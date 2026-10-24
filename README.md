@@ -8,6 +8,10 @@ Every prompt is a readable `.md` file. Variables are filled in with
 rendering, and returned as plain text with no HTML escaping. You can read the prompts on GitHub,
 try them in the local demo, or import them from npm.
 
+**Wiring symthink-io?** See [Integrating in the Symthink app](#integrating-in-the-symthink-app) for
+entrypoints, every `render…` helper, variable types, and how to map legacy `sourceFiles` to prompt
+ids. That section is written for AI assistants working in the main app repo.
+
 ## What's inside
 
 Prompts are grouped by what they are for. Each domain folder has a README listing its prompts,
@@ -40,9 +44,16 @@ never bundles the server prompts, and the server never bundles the copy-paste pr
 
 ## Install
 
+`@symthink/prompts` is published on [GitHub Packages](https://github.com/orgs/symthink/packages) (same registry as `@symthink/tree`). Point the `@symthink` scope at that registry, then install:
+
 ```bash
+# once per machine or project (symthink-io already has this in .npmrc)
+echo '@symthink:registry=https://npm.pkg.github.com' >> .npmrc
+
 npm install @symthink/prompts
 ```
+
+Authenticate with a GitHub token that has `read:packages` (for example `export NODE_AUTH_TOKEN="$(gh auth token)"` before `npm install`).
 
 ## Usage
 
@@ -88,14 +99,187 @@ try {
 }
 ```
 
+### What ships on npm
+
+The published tarball is intentionally small. It contains `dist/` (compiled JS and `.d.ts` files),
+this README, `LICENSE`, and `NOTICE`. It does **not** include `prompts/**/*.md`, `fixtures/`,
+`AGENTS.md`, or domain READMEs. Template text is embedded inside `dist/` at build time; at runtime
+you only render through the API below.
+
+Links in this README to `prompts/<domain>/…` point at the [GitHub source
+repo](https://github.com/symthink/prompts). After `npm install`, use `getPromptMeta` (see
+[Registry](#registry)) for variable names and types, or open the repo on GitHub to read template
+prose.
+
+## Integrating in the Symthink app
+
+This section is for humans and for AI assistants wiring
+[symthink-io](https://github.com/symthink/symthink-io) to render prompts from this package instead
+of duplicated in-repo strings.
+
+### Outcome
+
+Each call site that today builds prompt text locally should:
+
+1. Import the matching `render…` function (or `renderPrompt`) from the correct entrypoint.
+2. Pass the same **variables** the old builder already computed (URLs, labels, JSON blobs, etc.).
+3. Send the return value to the model API unchanged (`string`, or `{ system, user }` for
+   `output: "system_user"`).
+4. Delete the obsolete prompt constants, template literals, and any duplicate normalization—the
+   package already validates variables, applies optional `view()` formatting, renders Mustache,
+   and normalizes whitespace.
+
+Do **not** copy template markdown into symthink-io. The product should depend on a released
+`@symthink/prompts` version so prompt wording updates ride semver.
+
+### Find the prompt for a legacy call site
+
+Use the [Provenance](#provenance) table: each row links a prompt id to symthink-io `sourceFiles`
+(functions and modules that used to own the text). You can also search symthink-io for a distinctive
+phrase from the old prompt, then match that file to a row in the table.
+
+At runtime or in tooling, load metadata without rendering:
+
+```ts
+import { getPromptMeta, listPrompts } from '@symthink/prompts/registry';
+
+const meta = getPromptMeta('ballot.candidate-research');
+// meta.delivery → 'external-chat' | 'symthink-api'
+// meta.output → 'single' | 'system_user'
+// meta.variables → { name, type, required, description }[]
+// meta.usage.symthink.sourceFiles → legacy symthink-io paths
+// meta.usage.symthink.surfaces → product entry points (routes, UI, jobs)
+// meta.usage.symthink.wired → false until symthink-io uses this package for that id
+```
+
+Prefer migrating prompts where `usage.status` is `mirrored` (canonical text lives here; symthink-io
+still has a copy). Skip `reference` prompts unless you are deliberately adopting them. Check
+`usage.notes` for `deprecated` replacements.
+
+### Pick the import path
+
+| `meta.delivery` | Import from | Typical symthink-io location |
+|-----------------|-------------|------------------------------|
+| `external-chat` | `@symthink/prompts/external-chat` | Vite app (`src/`), client-side research flows |
+| `symthink-api` | `@symthink/prompts/symthink-api` | Supabase edge functions, Deno `npm:` imports |
+
+Never import `symthink-api` prompts from the browser bundle (they are server prompts). The two
+entrypoints are separate builds so tree-shaking keeps copy-paste prompts out of the server bundle
+and vice versa.
+
+### Render functions and variable types
+
+Every prompt has a stable id `<domain>.<slug>`. The npm entrypoint exports:
+
+| Export | Role |
+|--------|------|
+| `render<PromptName>(vars)` | Named helper; preferred at call sites |
+| `renderPrompt(id, vars)` | Same render, keyed by string id |
+| `validatePromptVars(id, vars)` | Zod check without rendering; returns `{ ok, issues }` |
+| `<Name>Vars` | TypeScript input type for that prompt's variables |
+| `externalChatPromptIds` / `symthinkApiPromptIds` | All ids in that entrypoint |
+| `PromptVariablesError` | Thrown when `renderPrompt` receives invalid vars |
+| `UnknownPromptError` | Thrown when `id` is not in that entrypoint |
+
+Naming rule for helpers: `domain.slug` → `render` + PascalCase segments, e.g.
+`ballot.candidate-research` → `renderBallotCandidateResearch`. Import the matching `…Vars` type
+from the same module.
+
+**`@symthink/prompts/external-chat`** (`output` is always `single` → `string`):
+
+| Prompt id | Render helper | Vars type |
+|-----------|---------------|-----------|
+| `articles.draft` | `renderArticleDraft` | `ArticleDraftVars` |
+| `articles.editorial-analysis` | `renderEditorialAnalysis` | `EditorialAnalysisVars` |
+| `ballot.candidate-research` | `renderBallotCandidateResearch` | `CandidateResearchVars` |
+| `ballot.candidate-roster` | `renderBallotCandidateRoster` | `CandidateRosterVars` |
+| `ballot.contest-research` | `renderBallotContestResearch` | `ContestResearchVars` |
+| `ballot.question-research` | `renderBallotQuestionResearch` | `QuestionResearchVars` |
+| `vision.civic-level-research` | `renderCivicLevelResearch` | `CivicLevelResearchVars` |
+| `vision.import-from-source` | `renderImportFromSource` | `ImportFromSourceVars` |
+| `vision.learning-with-ai` | `renderLearningWithAi` | `LearningWithAiVars` |
+| `vision.research` | `renderResearch` | `ResearchVars` |
+
+**`@symthink/prompts/symthink-api`**:
+
+| Prompt id | `output` | Render helper | Vars type |
+|-----------|----------|---------------|-----------|
+| `ballot.source-discovery` | `single` | `renderBallotSourceDiscovery` | `SourceDiscoveryVars` |
+| `ballot.upcoming-elections` | `single` | `renderUpcomingElections` | `UpcomingElectionsVars` |
+| `civic-areas.orientation` | `single` | `renderCivicAreaOrientation` | `OrientationVars` |
+| `civic-areas.orientation-repair` | `single` | `renderCivicAreaOrientationRepair` | `OrientationRepairVars` |
+| `civic-listening.synthesis` | `system_user` | `renderCivicListeningSynthesis` | `SynthesisVars` |
+| `in-app.labels` | `system_user` | `renderLabels` | `LabelsVars` |
+| `in-app.pdf-citation` | `system_user` | `renderPdfCitation` | `PdfCitationVars` |
+| `in-app.rephrase` | `system_user` | `renderRephrase` | `RephraseVars` |
+| `in-app.rephrase-options` | `system_user` | `renderRephraseOptions` | `RephraseOptionsVars` |
+| `in-app.single-label` | `system_user` | `renderSingleLabel` | `SingleLabelVars` |
+| `in-app.war-summary` | `system_user` | `renderWarSummary` | `WarSummaryVars` |
+
+For `system_user` prompts, the return type is `SystemUserPrompt` (`{ system: string; user: string }`).
+Wire `system` and `user` into your existing chat/completions helper the same way you already split
+static system instructions from the dynamic user payload.
+
+### Refactor pattern (symthink-io)
+
+```ts
+// Before: local string assembly in symthink-io
+// export function buildBallotCandidateResearchPrompt(ctx) { return `...${ctx.name}...`; }
+
+import {
+  renderBallotCandidateResearch,
+  type CandidateResearchVars,
+} from '@symthink/prompts/external-chat';
+
+export function buildBallotCandidateResearchPrompt(ctx: …): string {
+  const vars: CandidateResearchVars = {
+    electionName: ctx.electionName,
+    electionDay: ctx.electionDay,
+    contestTitle: ctx.contestTitle,
+    candidateName: ctx.candidateName,
+    fecCandidateId: ctx.fecCandidateId,
+  };
+  return renderBallotCandidateResearch(vars);
+}
+```
+
+Keep context-gathering, truncation, and API calls in symthink-io. Move only the **wording** and
+Mustache structure into this package. If the old builder applied extra formatting (JSON.stringify,
+bullet lists, etc.), check whether the Zod schema's optional `view()` in this repo already encodes
+that—duplicate formatting in symthink-io can double-encode or drift from snapshots.
+
+Optional sections in templates use Mustache (`{{#field}}…{{/field}}`). Lists expose derived flags
+such as `hasChildLines` and string equality flags such as `nodeTypeIs.question`; you do not pass
+those—they are computed at render time from the variables you supply.
+
+### Verify before merging
+
+1. **Types**: Let TypeScript guide the variable object; required fields match `meta.variables` with
+   `required: true`.
+2. **Validation**: In tests or dev, `validatePromptVars(id, vars)` should return `{ ok: true }` for
+   realistic fixtures.
+3. **Output**: Compare rendered text to the previous in-repo prompt for the same vars (character-level
+   diff). Normalization rules are fixed—see [Rendering rules](#rendering-rules).
+4. **Bundle**: Ensure client code only imports `@symthink/prompts/external-chat`.
+
+After symthink-io ships, update this repo's `meta.json` for that prompt (`usage.symthink.wired:
+true`, `usage.status: active`) in a follow-up change here—not in the app repo.
+
+### Registry
+
 To list prompts and their usage metadata without loading any template text:
 
 ```ts
-import { listPrompts, getPromptMeta } from '@symthink/prompts/registry';
+import { getPromptMeta, listDomains, listPrompts, promptRegistry } from '@symthink/prompts/registry';
 
-listPrompts({ delivery: 'external-chat' }).map((meta) => meta.id);
-getPromptMeta('ballot.source-discovery')?.usage.status;
+listPrompts({ delivery: 'symthink-api', domain: 'in-app' });
+listDomains();
+promptRegistry.length; // same metadata as getPromptMeta for every id
+getPromptMeta('ballot.source-discovery')?.usage.symthink.sourceFiles;
 ```
+
+`@symthink/prompts/registry` has no render functions and no Mustache dependency weight from the
+template bundles—safe for tooling, codegen, or admin UI that lists prompts.
 
 ### Rendering rules
 
@@ -144,16 +328,19 @@ tests.
 | `npm run docs:domain-index` | Regenerate the prompt tables in the domain READMEs and the provenance table below |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for template conventions and how to add a prompt.
-For AI assistants and Cursor agents, see [AGENTS.md](AGENTS.md).
+For AI assistants and Cursor agents **editing this repository**, see [AGENTS.md](AGENTS.md).
+Consumers who only install from npm should use [Integrating in the Symthink app](#integrating-in-the-symthink-app) above.
 
-## Moving this package to its own repository
+## Publishing
 
-This package is staged at `symthink-io/TEMP-symthink-prompts/` and is self-contained.
+Packages are published to GitHub Packages (`npm.pkg.github.com`), not the public npm registry.
 
-1. Copy the folder into a new repository, without `node_modules/`, `dist/`, or `src/generated/`.
-2. Run `npm install && npm test && npm run build`.
-3. Update `repository.url` in `package.json` if the repository name differs.
-4. Publish with `npm publish --access public`. `prepublishOnly` runs the tests and the build first.
+1. Authenticate: `export NODE_AUTH_TOKEN="$(gh auth token)"` (token needs `write:packages` and `repo` for private repos).
+2. From a clean working tree: `npm test && npm run build` (or rely on `prepublishOnly`).
+3. First publish: `npm publish`.
+4. Later releases: `npm run release` (uses [release-it](https://github.com/release-it/release-it) to bump semver, tag `v*`, create a GitHub release, and publish).
+
+Follow [AGENTS.md](AGENTS.md) for semver: prompt wording changes are **minor**; breaking variable contracts are **major**.
 
 ## Provenance
 

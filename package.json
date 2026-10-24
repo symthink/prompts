@@ -10,6 +10,10 @@
     "type": "git",
     "url": "git+https://github.com/symthink/prompts.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "keywords": [
     "prompts",
     "llm",
@@ -52,7 +56,8 @@
     "demo:build": "npm run generate && vite build --config demo/vite.config.ts",
     "docs:domain-index": "node scripts/domain-index.mjs",
     "docs:domain-index:check": "node scripts/domain-index.mjs --check",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "release": "GITHUB_TOKEN=$(gh auth token) release-it patch --ci"
   },
   "dependencies": {
     "mustache": "^4.2.0",
@@ -66,8 +71,19 @@
     "@vitejs/plugin-react": "^5.2.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "release-it": "^15.11.0",
     "typescript": "~5.8.3",
     "vite": "^7.3.7",
     "vitest": "^5.0.5"
+  },
+  "release-it": {
+    "$schema": "https://unpkg.com/release-it/schema/release-it.json",
+    "git": {
+      "requireCleanWorkingDir": true,
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true
+    }
   }
 }
