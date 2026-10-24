@@ -1,0 +1,24 @@
+---
+description: Core repo map, commands, and generated-file rules for @symthink/prompts
+alwaysApply: true
+---
+
+# @symthink/prompts
+
+Open-source Mustache prompt templates + Zod schemas for Symthink. Full agent workflow: [AGENTS.md](../../AGENTS.md). Human conventions: [CONTRIBUTING.md](../../CONTRIBUTING.md).
+
+## Layout
+
+- **Source of truth for text:** `prompts/<domain>/<slug>/` (`meta.json` + `prompt.md` or `system.md`/`user.md`)
+- **Variables:** `src/schemas/<domain>/<slug>.ts` (`definePrompt`)
+- **Registration:** `src/external-chat/index.ts` or `src/symthink-api/index.ts` per `meta.json` → `delivery`
+- **Never hand-edit:** `src/generated/` — run `npm run generate` after prompt changes
+
+## Before finishing work
+
+Run `npm test` (includes generate + domain README check + vitest). Use `npm run test:update` only when snapshot changes are intentional.
+
+## Scope
+
+- Prompt edits: keep neutral, sourced tone; fictional fixtures only
+- Minimize diff: do not refactor unrelated prompts or build scripts unless asked

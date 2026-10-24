@@ -144,6 +144,7 @@ tests.
 | `npm run docs:domain-index` | Regenerate the prompt tables in the domain READMEs and the provenance table below |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for template conventions and how to add a prompt.
+For AI assistants and Cursor agents, see [AGENTS.md](AGENTS.md).
 
 ## Moving this package to its own repository
 

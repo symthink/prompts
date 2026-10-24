@@ -1,0 +1,32 @@
+---
+description: Zod schemas, render entrypoints, and TypeScript wiring
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Schemas and registry
+
+## definePrompt
+
+```typescript
+export const myPrompt = definePrompt({
+  id: 'domain.slug', // must match prompts/domain/slug/meta.json
+  output: 'single' | 'system_user',
+  schema: z.strictObject({ /* keys align with meta.json variables */ }),
+  view?(vars) { /* only non-Mustache formatting */ },
+});
+```
+
+Reuse helpers from `src/schemas/shared.ts` (`lines`, `nonEmpty`, etc.).
+
+## Registration
+
+Add to `externalChatPrompts` or the symthink-api map in the matching `index.ts`. Export `render…` and `…Vars` type alongside siblings. Mismatched `delivery` fails CI.
+
+## Generated code
+
+Do not edit `src/generated/*.ts`. Regenerate with `npm run generate`.
+
+## New prompt checklist
+
+Schema file → register in index → `fixtures/<id>.json` → `npm run docs:domain-index` → `npm run test:update` → `npm test`.

@@ -1,0 +1,30 @@
+---
+description: Mustache prompt files, meta.json, and partials
+globs: prompts/**/*
+alwaysApply: false
+---
+
+# Prompt templates
+
+Id is `<domain>.<slug>` and must match the directory path and `meta.json` → `id`.
+
+## Files
+
+| `output` in meta.json | Files |
+|-----------------------|--------|
+| `single` | `prompt.md` |
+| `system_user` | `system.md` and `user.md` |
+
+Shared prose: `prompts/_partials/` included as `{{> partial-name}}`.
+
+## Mustache
+
+- Optional block: `{{#field}}…{{/field}}` — use `{{^field}}` for empty/missing
+- String lists: `{{#lines}}- {{.}}{{/lines}}` with tags on their own lines when wrapping lines
+- Use built-in `has<Field>` and `<name>Is.<value>` (see CONTRIBUTING) instead of custom view logic for booleans
+
+## meta.json
+
+Update `variables` when the schema changes. Run `npm run docs:domain-index` after usage/status changes. Do not edit generated tables inside domain READMEs by hand.
+
+After any `.md` or `meta.json` change: `npm run generate`, then `npm test` or `npm run test:update` if snapshots shift.
