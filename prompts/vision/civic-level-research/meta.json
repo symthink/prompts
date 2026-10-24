@@ -1,0 +1,24 @@
+{
+  "id": "vision.civic-level-research",
+  "title": "Civic research with AI",
+  "description": "Guides a two-phase conversation that explores a level of government in the user's jurisdiction, then pastes back a set of Questions under that civic-level node.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "levelLabel", "type": "string", "required": true, "description": "Tree label of the civic-level node (e.g. `State`, `SLD Upper Chamber`)." },
+    { "name": "semanticType", "type": "string", "required": true, "description": "Civic scope key of the level (e.g. `state`, `county`)." },
+    { "name": "jurisdiction", "type": "{ placeName, districtNumber?, stateCode? }", "required": false, "description": "Resolved place for this level. Omit when the civic ladder has no data; the prompt then tells the AI not to invent place names." },
+    { "name": "questionText", "type": "string", "required": true, "description": "Current text of the civic-level Question, with tree markers already replaced by punctuation (❓ → ?). The root bullet gets a ❓ appended unless the text already contains one." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Options → Civic research with AI (`civic_research`: a civic-level Question with a civic scope key)"],
+      "sourceFiles": ["symthink-io/src/utils/civicLevelAiResearchContext.helpers.ts (buildCivicLevelResearchPrompt)"],
+      "docs": "symthink-io/docs/developer-guide/systems/my-vision-options-menu.md"
+    },
+    "pasteBack": true,
+    "notes": "Paste-back is Questions only. The root bullet gets a ❓ marker when the question text has none."
+  }
+}

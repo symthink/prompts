@@ -1,0 +1,22 @@
+{
+  "id": "in-app.pdf-citation",
+  "title": "PDF citation extraction",
+  "description": "Extracts CSL-shaped citation metadata (title, authors, date, publisher, affiliations, DOI) from the first pages of a PDF.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "pdfText", "type": "string", "required": true, "description": "Plain text of the first pages of the PDF (truncated by the caller)." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["POST /api/ai/metadata (citation resolver, when the source URL is a PDF)"],
+      "sourceFiles": [
+        "symthink-io/supabase/functions/_shared/ai/capabilities/pdf-citation.ts (PDF_CITATION_SYSTEM_PROMPT)",
+        "symthink-io/supabase/functions/_shared/pdf-citation-resolver.ts"
+      ]
+    },
+    "pasteBack": false
+  }
+}

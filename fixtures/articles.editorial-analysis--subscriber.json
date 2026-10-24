@@ -1,0 +1,4 @@
+{
+  "audience": "subscriber",
+  "treeYaml": "type: question\nlabel: Library hours\ntext: Should branch libraries open on Sundays?\nsupport:\n  - type: claim\n    label: Demand\n    text: Weekend visits rose 18% after Saturday hours were extended.\n"
+}

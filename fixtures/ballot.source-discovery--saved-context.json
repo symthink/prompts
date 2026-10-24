@@ -1,0 +1,15 @@
+{
+  "location": "Springfield, IL 62701",
+  "districts": [
+    { "type": "County", "name": "Sangamon County" }
+  ],
+  "civicElections": [],
+  "savedContext": {
+    "reuseScope": "county",
+    "key": "il-sangamon",
+    "precinct": "Capital 42",
+    "ballotStyle": "Style 14",
+    "sourceAgency": "Example County Clerk — Elections Division",
+    "sourceUrl": "https://elections.example.gov/sample-ballots"
+  }
+}

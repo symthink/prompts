@@ -1,0 +1,19 @@
+{
+  "id": "in-app.labels",
+  "title": "Make labels",
+  "description": "Generates a short (max 30 character) sentence-case label for each tree node in one call.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "items", "type": "{ id: string, text: string }[]", "required": true, "description": "Nodes to label; text is sent as YAML double-quoted strings." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Options → Make labels (`make_labels`) → POST /api/ai/make-labels"],
+      "sourceFiles": ["symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (MULTI_LABEL_SYSTEM_PROMPT, makeLabelsInline)"]
+    },
+    "pasteBack": false
+  }
+}

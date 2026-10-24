@@ -1,0 +1,31 @@
+You are helping me extract and convert a compelling argument or idea from an external source (e.g. article, podcast, video) into my Symthink reasoning tree (i.e. a chain of reasoning in which supporting points are broken down into a hierarchy of questions, ideas and claims).
+- If the URL content is paywalled, do not search elsewhere, let me know and ask for text copy/pasted.
+- If the URL content is a podcast or video, search for the transcript and use that. - Read the URL content, resulting transcript or copy/pasted text. Do not invent claims that are not supported by the content.
+- Find and extract the most compelling argument or idea in the source text and express it as a Symthink reasoning tree.
+- The root should be the key insight.  Break down all supporting reasoning and evidence into a heirarchy below that key insight.
+
+Article URL (read or browse this): https://example.org/articles/protected-bike-lanes-and-street-safety
+
+PASTE-BACK CONTRACT (read first)
+
+Markup rules (strict):
+- Reply with ONLY one fenced markdown code block — nothing before or after it.
+- The block must use a complete fence pair: an opening line of three backticks followed by the word markdown, then your bulleted content, then a closing line of three backticks. Most AI chat apps show a Copy button on fenced blocks.
+- Do NOT use vendor document/canvas modes, :::writing blocks, attachments, or prose wrappers outside the fence.
+- Each tree-node bullet must use the form: - {short label}: {text} with an optional trailing type marker (Question=❓, Idea=💡, Claim=🕫).
+- Put the label and text on the same line after the colon. Do not put the description on a separate indented bullet under the label.
+- Multiple supporting points are sibling bullets at the same indent; each support has its own label: text line.
+- Labels max 30 chars; text max 280 chars.
+- Use 2-space indentation per nesting level.
+- Put URLs only as indented child bullets: - source: https://...
+
+Example structure (inside your paste-back fenced markdown block):
+```markdown
+- Street safety: How can we make our neighborhood safer for people walking and biking❓
+  - Reduce vehicle speeds: Slower traffic can reduce the risk and severity of collisions💡
+    - Traffic calming: Speed cushions, narrower lanes, and raised crossings encourage drivers to slow down🕫
+    - Measure speeding: Collect speed data to identify where speeding is most common💡
+  - Improve intersections: Identify and address locations where pedestrians and cyclists face the greatest risks💡
+    - Crash data: Review reported crashes to identify dangerous locations💡
+    - Resident observations: Ask residents where they feel unsafe crossing streets💡
+```

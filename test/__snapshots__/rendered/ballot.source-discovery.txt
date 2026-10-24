@@ -1,0 +1,32 @@
+Use web search to find official U.S. election-office pages where a voter in this jurisdiction can obtain a sample ballot or personalized sample ballot lookup.
+
+Voter jurisdiction context (public geographic data only — do NOT search for or request street address, voter name, date of birth, or unconfirmed precinct or ballot-style details):
+Location: Springfield, IL 62701
+Districts:
+- Congressional district: Illinois's 13th congressional district
+- State senate district: Illinois State Senate District 12
+- County: Sangamon County
+
+Upcoming elections from Google Civic (context only — official sample ballots remain the source of truth):
+- Illinois Midterm General Election (2026-11-03)
+
+Find up to 4 candidate sources. Rank and label them as follows:
+- STRONGLY PREFER the voter's state chief election authority (state board of elections or secretary of state elections division) for personalized sample ballot lookup when that state portal exists.
+- Put county and municipal election-office sample-ballot pages in alternates unless the state has no voter lookup portal and the locality is the sole official source.
+- Accept official sample ballot PDFs and official voter lookup pages hosted on government domains.
+- Vendor sites are acceptable ONLY as alternates when clearly linked from an official election office.
+- EXCLUDE party, campaign, advocacy, news, and third-party voter-guide sites unless no official source exists; if included, mark them low confidence and unverified.
+- Do not fabricate URLs; only include pages you actually retrieved via web search.
+
+Return ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
+{"recommended":<source or null>,"alternates":[<sources>],"warnings":[<strings>]}
+
+Each source object must use these fields exactly:
+{"url":"https://...","host":"example.gov","sourceAgency":"Maryland State Board of Elections","sourceType":"personalized_sample_ballot_lookup|sample_ballot_pdf|election_information_page|voter_guide|unknown","confidence":"high|medium|low","officialDomainStatus":"official_government_domain|official_election_board_domain|vendor_linked_from_official_source|unverified","reason":"Why this is official or low-confidence","requiresManualInfo":["street address"],"privacyInstruction":"Enter any required voter lookup details only on the official government site, not in Symthink or external AI tools."}
+
+Rules:
+- recommended must be the best state-level official sample-ballot or voter lookup source when available; otherwise the best county/local official source, or null if none found.
+- alternates may include other official pages or clearly labeled low-confidence third-party pages.
+- requiresManualInfo lists fields the official site may ask for (e.g. "street address", "date of birth") without collecting them here.
+- privacyInstruction must tell the user to enter manual lookup fields only on the official site.
+- warnings should note uncertainty, missing jurisdiction data, or when only non-government sources were found.

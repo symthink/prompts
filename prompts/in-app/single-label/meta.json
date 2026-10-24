@@ -1,0 +1,20 @@
+{
+  "id": "in-app.single-label",
+  "title": "Single label",
+  "description": "Legacy single-node label generator returning `{ label }` JSON.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "text", "type": "string", "required": true, "description": "Text to label." }
+  ],
+  "usage": {
+    "status": "reference",
+    "symthink": {
+      "wired": false,
+      "surfaces": [],
+      "sourceFiles": ["symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (SINGLE_LABEL_SYSTEM_PROMPT, getTextLabel)"]
+    },
+    "pasteBack": false,
+    "notes": "getTextLabel is still exported from _shared/ai but has no callers. Superseded by in-app.labels."
+  }
+}

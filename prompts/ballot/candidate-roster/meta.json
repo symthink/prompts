@@ -1,0 +1,25 @@
+{
+  "id": "ballot.candidate-roster",
+  "title": "Ballot candidate roster",
+  "description": "Fills in verified candidate names (and any missing ballot-question titles) for every contest parsed from a sample ballot, as a single paste-back tree.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "elections", "type": "Election[]", "required": true, "description": "One entry per imported election: `name`, optional `electionDay`, `ballotStyle`, `partyContext`, plus `contests[]` and `questions[]` with `displayText` and optional `votingInstruction`." },
+    { "name": "officialSourceUrl", "type": "string (URL)", "required": false, "description": "Official sample-ballot page the parse came from." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "Ballot Research wizard → Contests step (BallotContestsStep)",
+        "Ballot Research → Fill candidates dialog (BallotCandidatesDialog)"
+      ],
+      "sourceFiles": ["symthink-io/src/utils/ballotCandidateRoster.helpers.ts (buildBallotCandidateRosterPrompt)"],
+      "docs": "symthink-io/docs/developer-guide/systems/ballot-research.md"
+    },
+    "pasteBack": true,
+    "notes": "Uses its own roster-specific paste-back contract instead of the shared partial. A blank line now follows every election block; the symthink-io source omits it after the last election."
+  }
+}

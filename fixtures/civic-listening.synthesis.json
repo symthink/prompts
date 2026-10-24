@@ -1,0 +1,10 @@
+{
+  "tier": "5_plus",
+  "submissions": [
+    { "id": 1, "body": "The bus stops near the high school need shelters." },
+    { "id": 2, "body": "Buses come every 40 minutes on Sundays, which is too long." },
+    { "id": 3, "body": "Please add a stop by the new clinic on Oak Street." },
+    { "id": 4, "body": "I'd ride more if the evening service ran past 9pm." },
+    { "id": 5, "body": "Shelters with benches would help older riders." }
+  ]
+}

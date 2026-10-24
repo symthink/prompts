@@ -1,0 +1,22 @@
+{
+  "id": "in-app.rephrase-options",
+  "title": "Rephrase options",
+  "description": "Returns three type-aware rephrasings of a tree node (questions stay questions, claims stay declarative, ideas stay tentative) as JSON.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "nodeType", "type": "\"question\" | \"claim\" | \"idea\"", "required": true, "description": "Node type; selects the tone rules." },
+    { "name": "text", "type": "string", "required": true, "description": "Text to rephrase (sent JSON-encoded in the user message)." },
+    { "name": "maxChars", "type": "number", "required": false, "description": "Maximum characters per option. Default 280." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["POST /api/ai/rephrase (endpoint is live; no current client UI calls it since Rephrase left the My Vision Options menu)"],
+      "sourceFiles": ["symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (buildRephraseSystemPrompt, getRephraseOptions)"]
+    },
+    "pasteBack": false,
+    "notes": "symthink-io joins the system prompt into one paragraph; this template puts the type-specific rule on its own line. symthink-io fixes the limit at 280 characters (and truncates longer options); here it is the `maxChars` variable, defaulting to 280."
+  }
+}

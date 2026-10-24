@@ -1,0 +1,31 @@
+{
+  "boundary_group_id": "bg_il_sldu_12",
+  "name": "Illinois State Senate District 12",
+  "authoring_scope_key": "sld_upper",
+  "representation_topology": "coterminous_legislative_district",
+  "country": "US",
+  "state_or_equivalent": "IL",
+  "level_display": "State Legislative District",
+  "parent_areas": [
+    { "semantic_type": "state", "name": "Illinois" }
+  ],
+  "scope_identifiers": { "state_fips": "17", "district": "012" },
+  "ladder_members": [
+    {
+      "semantic_type": "sld_upper",
+      "name": "State Senate District 12",
+      "civic_area_id": "ca_il_sldu_12",
+      "identifiers": { "geoid": "17012" }
+    },
+    {
+      "semantic_type": "sld_lower",
+      "name": "State House District 23",
+      "civic_area_id": "ca_il_sldl_23"
+    }
+  ],
+  "representation_channels": [
+    { "representation_role": "state_senator", "chamber": "upper", "district_code": "12", "seat_count": 1 },
+    { "representation_role": "state_representative", "chamber": "lower", "district_code": "23", "seat_count": 1 }
+  ],
+  "additional_context": "The upper district contains two whole lower districts."
+}

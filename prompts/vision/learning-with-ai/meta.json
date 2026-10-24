@@ -1,0 +1,27 @@
+{
+  "id": "vision.learning-with-ai",
+  "title": "Learning with AI",
+  "description": "Copy-paste tutor prompt that helps a person learn the concepts behind a Question in their reasoning tree, iteratively and with knowledge checks.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "situationPreface", "type": "string", "required": false, "description": "Optional civic context lines (e.g. level of government and place) shown before the tree context." },
+    { "name": "ancestorLines", "type": "string[]", "required": false, "description": "Ancestor nodes from tree root to parent, each formatted as `label: text`." },
+    { "name": "questionText", "type": "string", "required": true, "description": "The Question being explored." },
+    { "name": "childLines", "type": "string[]", "required": false, "description": "Direct children of the Question (unverified notes), each formatted as `label: text`." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Options → Learning with AI (`learning_with_ai`: a Question under a civic scope, without its own civic scope key)"],
+      "sourceFiles": [
+        "symthink-io/src/prompts/learningWithAi.ts",
+        "symthink-io/src/utils/learningWithAiPrompt.builder.ts"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/learning-with-ai.md"
+    },
+    "pasteBack": false,
+    "notes": "Copy-only workflow; there is no paste-back step."
+  }
+}

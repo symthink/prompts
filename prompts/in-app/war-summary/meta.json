@@ -1,0 +1,30 @@
+{
+  "id": "in-app.war-summary",
+  "title": "Weekly legislative activity report",
+  "description": "Writes a 150–250 word nonpartisan, wire-service-style summary of a legislator's bills for a reporting period.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "billTitlesContent", "type": "string", "required": true, "description": "Bill titles with dates and sponsor/cosponsor role, one per line." },
+    { "name": "legislatorName", "type": "string", "required": true, "description": "Legislator display name." },
+    { "name": "periodStart", "type": "string", "required": true, "description": "Start of the reporting period." },
+    { "name": "periodEnd", "type": "string", "required": true, "description": "End of the reporting period." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "process-war-refresh edge function (weekly summaries on Home → Federal representatives)",
+        "GET /api/war/prompt (prompt disclosure shown to users)",
+        "ETL/summarize-legislation.mts"
+      ],
+      "sourceFiles": [
+        "symthink-io/supabase/functions/_shared/ai/prompts/war.ts (WAR_SYSTEM_PROMPT)",
+        "symthink-io/supabase/functions/_shared/ai/capabilities/war-summary.ts (generateWarSummary)"
+      ]
+    },
+    "pasteBack": false,
+    "notes": "The system prompt is also displayed verbatim to users as a transparency disclosure."
+  }
+}

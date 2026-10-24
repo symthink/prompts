@@ -1,0 +1,58 @@
+Use web search to identify the next upcoming elections for a voter in this U.S. jurisdiction.
+
+Today's date: Saturday, October 24, 2026 (2026-10-24). Only include elections strictly AFTER this date.
+
+Voter jurisdiction context (public geographic data only — do NOT search for or request street address, voter name, date of birth, precinct ID, or ballot-style ID):
+Location: Springfield, IL 62701
+Districts:
+- Congressional district: Illinois's 13th congressional district
+- County: Sangamon County
+
+Upcoming elections from Google Civic (context only — official sample ballots remain the source of truth):
+- Illinois Midterm General Election (2026-11-03)
+- Springfield Municipal Election
+
+Task:
+- Return the next 3 chronologically upcoming election events for this jurisdiction that are AFTER 2026-10-24. Each distinct party-primary event counts toward this limit (e.g. separate Democratic and Republican primaries each count as one event).
+- EXCLUDE any election on or before 2026-10-24, including elections that happened yesterday.
+- Provide the specific election name and calendar date when supported by official or reliable election-office sources.
+- Do NOT fabricate specific election names or calendar dates.
+- When no specific date is available, set electionDay to null, datePrecision to "month", and put the month/year in scheduledLabel (e.g. "June 2026").
+- ALWAYS include the next U.S. Presidential general election in your response. If it is not among the next 3 chronologically, add it as an additional election — even if it is several years away.
+- Return ONE row per election event (date), not per office or contest. Do NOT list governor, U.S. Senate, U.S. House, or other individual races separately when they share the same general, midterm, or presidential election day.
+- Exception for primaries: when a jurisdiction holds separate party primary elections (different dates OR separate party ballots on the same date), return one row per distinct party-primary event—not one generic "Primary Election" row that hides the party.
+- Prefer official state, county, and local election-office sources (.gov).
+- Do NOT include elections you cannot name confidently. Put that uncertainty in warnings instead of the elections array.
+
+Election naming and cycle rules (important):
+- Use kind to reflect the electoral cycle, not only a state's internal label.
+- kind values: primary | midterm | general | presidential | special | local | other
+- For the November general election in a federal midterm cycle (even-numbered years that are NOT presidential years, e.g. 2026, 2022): use kind "midterm".
+- For that midterm election, the name MUST include the word "Midterm" and SHOULD include the state when known (e.g. "Oklahoma Midterm General Election", NOT merely "Oklahoma Statewide General Election").
+- State election offices often say "Statewide General Election" for the November midterm ballot. That is a state-centric label. Translate it into a voter-friendly midterm name while keeping the same date and jurisdiction.
+- For November general elections in presidential years (e.g. 2028), use kind "presidential" and include "Presidential" in the name.
+- Use kind "general" only for non-November general elections or other general elections that are not federal midterm/presidential cycles.
+- Use kind "primary" for party primary elections; use kind "local" for municipal/school/board elections; use kind "special" for special elections.
+- Include Illinois in the name when the election is statewide for that voter's state.
+- Do NOT prefix election names with the calendar year when electionDay is set—the date appears separately in electionDay and scheduledLabel.
+Party primary naming (important):
+- When an official source describes a party-specific primary or party ballot, the name MUST include the party using the source's wording (e.g. "Democratic", "Republican", "Libertarian", "Nonpartisan").
+- Do NOT add a party label when the official election is not party-specific (combined/runoff primaries, open primaries, nonpartisan primaries named without a major party).
+- Do NOT guess a party. If separate party primaries cannot be confirmed confidently, omit uncertain rows and explain in warnings.
+- If Democratic and Republican primaries share the same calendar date, return separate rows with distinct names—do not merge them.
+
+Return ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
+{"elections":[<election objects>],"warnings":[<strings>]}
+
+Each election object must use these fields exactly:
+{"name":"Oklahoma Midterm General Election","electionDay":"2026-11-03","datePrecision":"day","scheduledLabel":"Tuesday, November 3, 2026","kind":"midterm","confidence":"high","sourceUrl":"https://oklahoma.gov/...","summary":"Federal midterm cycle with congressional, state, and local offices."}
+{"name":"Oklahoma Democratic Primary Election","electionDay":"2026-06-16","datePrecision":"day","scheduledLabel":"Tuesday, June 16, 2026","kind":"primary","confidence":"high","sourceUrl":"https://oklahoma.gov/...","summary":"Democratic party primary for federal, state, and local offices."}
+{"name":"Oklahoma Runoff Primary Election","electionDay":"2026-08-25","datePrecision":"day","scheduledLabel":"Tuesday, August 25, 2026","kind":"primary","confidence":"high","sourceUrl":"https://oklahoma.gov/...","summary":"Runoff primary for contests that did not receive a majority in the June primary."}
+
+Field rules:
+- datePrecision: day (when electionDay is set) | month (when only month/year is known)
+- confidence: high | medium | low
+- Do NOT return elections with confidence "low". Omit them and explain the uncertainty in warnings.
+- Election names must be definitive official titles. Never end a name with "?" or use hedged phrasing like "Special or Local Elections".
+- sourceUrl: optional official .gov page supporting this election date/name
+- warnings: note uncertainty, missing jurisdiction data, or when dates are estimated to month only

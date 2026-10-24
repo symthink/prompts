@@ -1,0 +1,73 @@
+{
+  "name": "@symthink/prompts",
+  "version": "0.1.0",
+  "description": "Open-source AI prompt templates used by Symthink, with typed variables and Mustache interpolation.",
+  "license": "Apache-2.0",
+  "author": "Thomas W. Ford",
+  "type": "module",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/symthink/prompts.git"
+  },
+  "keywords": [
+    "prompts",
+    "llm",
+    "mustache",
+    "templates",
+    "symthink",
+    "civic"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "exports": {
+    "./external-chat": {
+      "types": "./dist/types/external-chat/index.d.ts",
+      "import": "./dist/esm/external-chat/index.js",
+      "require": "./dist/cjs/external-chat/index.js"
+    },
+    "./symthink-api": {
+      "types": "./dist/types/symthink-api/index.d.ts",
+      "import": "./dist/esm/symthink-api/index.js",
+      "require": "./dist/cjs/symthink-api/index.js"
+    },
+    "./registry": {
+      "types": "./dist/types/registry/index.d.ts",
+      "import": "./dist/esm/registry/index.js",
+      "require": "./dist/cjs/registry/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "generate": "node scripts/build-templates.mjs",
+    "build": "npm run generate && node scripts/clean-dist.mjs && tsc -p tsconfig.build.json && tsc -p tsconfig.cjs.json && node scripts/write-cjs-package.mjs",
+    "typecheck": "npm run generate && tsc --noEmit",
+    "test": "npm run generate && npm run docs:domain-index:check && vitest run",
+    "test:update": "npm run generate && vitest run --update",
+    "demo": "npm run generate && vite --config demo/vite.config.ts",
+    "demo:build": "npm run generate && vite build --config demo/vite.config.ts",
+    "docs:domain-index": "node scripts/domain-index.mjs",
+    "docs:domain-index:check": "node scripts/domain-index.mjs --check",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/mustache": "^4.2.6",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.3.7",
+    "vitest": "^5.0.5"
+  }
+}

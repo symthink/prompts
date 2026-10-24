@@ -1,0 +1,24 @@
+{
+  "id": "ballot.contest-research",
+  "title": "Ballot contest research",
+  "description": "Researches one contest on the user's imported ballot: verified candidates, their official websites, voting instructions, and the office's top responsibilities.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "electionName", "type": "string", "required": true, "description": "Election display text (e.g. `2026 Maryland Primary Election`)." },
+    { "name": "electionDay", "type": "string", "required": false, "description": "Election date, ISO `YYYY-MM-DD` preferred." },
+    { "name": "contestTitle", "type": "string", "required": true, "description": "Contest title without the `Contest:` prefix or type markers." },
+    { "name": "contestCandidates", "type": "string[]", "required": false, "description": "Candidate names already imported under this contest. When present, the AI is told to use them instead of searching." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Ballot Research → Contest → Options (`ballot_contest_research`)"],
+      "sourceFiles": ["symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotContestResearchPrompt)"],
+      "docs": "symthink-io/docs/developer-guide/systems/ballot-research.md"
+    },
+    "pasteBack": true,
+    "notes": "Indentation of the verified-candidate list is normalized to three spaces for every name; the symthink-io source only indents the first name consistently."
+  }
+}

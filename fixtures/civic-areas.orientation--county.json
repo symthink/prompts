@@ -1,0 +1,16 @@
+{
+  "boundary_group_id": "bg_il_county_sangamon",
+  "name": "Sangamon County",
+  "authoring_scope_key": "county",
+  "representation_topology": "general_government_scope",
+  "country": "US",
+  "state_or_equivalent": null,
+  "level_display": "County",
+  "ladder_members": [
+    {
+      "semantic_type": "county",
+      "name": "Sangamon County",
+      "civic_area_id": "ca_il_county_sangamon"
+    }
+  ]
+}

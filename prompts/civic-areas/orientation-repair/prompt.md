@@ -1,0 +1,1 @@
+Your previous response was not valid JSON matching the Civic Area Orientation schema. Return valid JSON only with fields: overview, responsibilities, decision_makers, resident_participation, get_involved (array of {title, description, url|null}), sources (array of {title, url, publisher|null}). No markdown fences or commentary.

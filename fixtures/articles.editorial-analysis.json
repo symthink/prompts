@@ -1,0 +1,4 @@
+{
+  "audience": "author",
+  "treeYaml": "type: question\nlabel: Transit funding\ntext: How should Springfield fund expanded bus service?\nsupport:\n  - type: idea\n    label: Sales tax\n    text: Add a quarter-cent sales tax dedicated to transit.\n    editorial_note: Needs revenue estimates.\n    support:\n      - type: claim\n        label: Revenue\n        text: A quarter-cent tax would raise about $9 million a year.\n        sources:\n          - https://example.org/budget-office/transit-revenue-estimate\n  - type: idea\n    label: Fare changes\n    text: Raise fares during peak hours only.\n"
+}

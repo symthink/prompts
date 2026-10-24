@@ -1,0 +1,29 @@
+{
+  "id": "vision.research",
+  "title": "Research with AI",
+  "description": "Generic research prompt for an Idea, Claim, or Question in the user's tree, with a paste-back step that nests new points under the current node.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "nodeType", "type": "\"question\" | \"idea\" | \"claim\"", "required": true, "description": "Type of the node being researched; changes the framing, closing ask, and root marker." },
+    { "name": "ancestorLines", "type": "string[]", "required": false, "description": "Ancestor nodes from tree root to parent, each formatted as `label: text`." },
+    { "name": "currentText", "type": "string", "required": true, "description": "Text of the node being researched." },
+    { "name": "childLines", "type": "string[]", "required": false, "description": "Text of the node's direct children." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "My Vision → Options → Research with AI (`general_research`: an Idea or Claim under a civic scope)"
+      ],
+      "sourceFiles": [
+        "symthink-io/src/utils/ai.store.ts (buildResearchPrompt, assembleResearchPromptBody)",
+        "symthink-io/src/utils/pasteBackContract.helpers.ts"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/my-vision-options-menu.md"
+    },
+    "pasteBack": true,
+    "notes": "The root bullet is the current node text with its type marker appended when missing."
+  }
+}

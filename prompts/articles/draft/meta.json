@@ -1,0 +1,25 @@
+{
+  "id": "articles.draft",
+  "title": "Article draft",
+  "description": "Prompt 2 of evidence-aware article drafting, sent in the same chat after the editorial analysis: writes the strongest article the reasoning honestly supports, with inline editorial-gap annotations.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "My Vision → Options → Analyze reasoning (`analyze_reasoning`, second prompt)",
+        "Shared Vision → Article mode (author only)"
+      ],
+      "sourceFiles": [
+        "symthink-io/src/prompts/articleDraft.ts",
+        "symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt)"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/evidence-aware-article-drafting.md"
+    },
+    "pasteBack": false,
+    "notes": "Context-free: relies on the tree and analysis from Prompt 1 earlier in the same conversation."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "civic-listening.synthesis",
+  "title": "Civic listening synthesis",
+  "description": "Clusters anonymous community submissions into a Symthink JSON tree of themed Claims with verbatim quote leaves.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "tier", "type": "\"5_plus\" | \"20_plus\"", "required": true, "description": "`5_plus` allows flat categories only; `20_plus` allows sub-categories for broad themes." },
+    { "name": "submissions", "type": "{ id: number, body: string }[]", "required": true, "description": "Anonymous submissions with stable numeric ids the model references in metadata." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "Civic listening session synthesis (GET /api/listening-sessions/:id/synthesis, close-session final synthesis)"
+      ],
+      "sourceFiles": [
+        "symthink-io/supabase/functions/_shared/civic-listening/synthesis-prompts.ts (buildPrompt)",
+        "symthink-io/supabase/functions/_shared/civic-listening/run-synthesis.ts"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/civic-listening.md"
+    },
+    "pasteBack": false,
+    "notes": "The user message is a JSON payload. This template pretty-prints it; symthink-io sends the same payload as compact JSON. The API also enforces JSON with response_format, and the server checks that quote leaves are verbatim."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "levelLabel": "SLD Upper Chamber",
+  "semanticType": "sld_upper",
+  "jurisdiction": {
+    "placeName": "State Senate District 12",
+    "districtNumber": 12,
+    "stateCode": "IL"
+  },
+  "questionText": "SLD Upper Chamber: What opportunities and challenges can be addressed in our district"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "vision.import-from-source",
+  "title": "Import from source URL",
+  "description": "Asks an external AI to read an article, podcast, or video and extract its most compelling argument as a Symthink tree for paste-back.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "articleUrl", "type": "string (URL)", "required": true, "description": "Normalized http(s) URL of the source to read." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Options → Import from source URL (`import_from_article`: any Question, Idea, or Claim)"],
+      "sourceFiles": [
+        "symthink-io/src/prompts/importFromArticle.ts",
+        "symthink-io/src/utils/importFromArticlePrompt.builder.ts",
+        "symthink-io/src/utils/pasteBackContract.helpers.ts"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/my-vision-options-menu.md"
+    },
+    "pasteBack": true,
+    "notes": "Pasted tree is attached as a new child of the Options subject (not flattened onto it)."
+  }
+}

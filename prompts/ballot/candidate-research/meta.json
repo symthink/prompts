@@ -1,0 +1,24 @@
+{
+  "id": "ballot.candidate-research",
+  "title": "Ballot candidate research",
+  "description": "Researches one candidate on the user's imported ballot using public record, campaign site, filings, endorsements, and prior office experience.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "electionName", "type": "string", "required": true, "description": "Election display text." },
+    { "name": "electionDay", "type": "string", "required": false, "description": "Election date, ISO `YYYY-MM-DD` preferred." },
+    { "name": "contestTitle", "type": "string", "required": false, "description": "Title of the contest the candidate is running in." },
+    { "name": "candidateName", "type": "string", "required": true, "description": "Candidate name without the `Candidate:` prefix." },
+    { "name": "fecCandidateId", "type": "string", "required": false, "description": "Federal Election Commission candidate id; adds an FEC profile link." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": ["My Vision → Ballot Research → Candidate → Options (`ballot_candidate_research`)"],
+      "sourceFiles": ["symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotCandidateResearchPrompt)"],
+      "docs": "symthink-io/docs/developer-guide/systems/ballot-research.md"
+    },
+    "pasteBack": true
+  }
+}

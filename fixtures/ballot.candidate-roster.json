@@ -1,0 +1,27 @@
+{
+  "elections": [
+    {
+      "name": "Illinois Democratic Primary Election",
+      "electionDay": "2026-03-17",
+      "ballotStyle": "Style 14",
+      "partyContext": "Democratic",
+      "contests": [
+        { "displayText": "Governor", "votingInstruction": "Vote for 1" },
+        { "displayText": "State Senator, District 12", "votingInstruction": "Vote for 1" }
+      ],
+      "questions": []
+    },
+    {
+      "name": "Illinois Midterm General Election",
+      "electionDay": "2026-11-03",
+      "contests": [
+        { "displayText": "U.S. Representative, District 13" },
+        { "displayText": "County Board Member, District 4", "votingInstruction": "Vote for not more than 2" }
+      ],
+      "questions": [
+        { "displayText": "Springfield Library Facilities Bond Question", "votingInstruction": "Yes / No" }
+      ]
+    }
+  ],
+  "officialSourceUrl": "https://elections.example.gov/sample-ballots/2026"
+}

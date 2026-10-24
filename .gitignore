@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output (see README: copy repo without dist/ or src/generated/)
+dist/
+demo/dist/
+src/generated/
+
+# OS
+.DS_Store
+
+# Local env / editor (optional safety)
+.env
+.env.*
+!.env.example

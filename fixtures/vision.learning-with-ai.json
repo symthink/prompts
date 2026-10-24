@@ -1,0 +1,11 @@
+{
+  "situationPreface": "Civic context: County level of government\nPlace — Springfield County",
+  "ancestorLines": [
+    "Budget: How should we fund transit❓"
+  ],
+  "questionText": "Should we expand bus service❓",
+  "childLines": [
+    "Ridership data: Weekday routes are at capacity💡",
+    "Cost: Each new route needs two additional drivers🕫"
+  ]
+}

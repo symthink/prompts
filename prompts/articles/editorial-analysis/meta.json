@@ -1,0 +1,28 @@
+{
+  "id": "articles.editorial-analysis",
+  "title": "Article editorial analysis",
+  "description": "Prompt 1 of evidence-aware article drafting: an editorial analyst assesses a YAML Question branch for gaps and scores its article readiness.",
+  "delivery": "external-chat",
+  "output": "single",
+  "variables": [
+    { "name": "audience", "type": "\"author\" | \"subscriber\"", "required": false, "description": "`author` (default) evaluates their own branch; `subscriber` evaluates another user's public reasoning to find where they can contribute." },
+    { "name": "treeYaml", "type": "string (YAML)", "required": true, "description": "Serialized Question branch: `type`, `label`, `text`, `sources[]`, `editorial_note`, `support[]`." }
+  ],
+  "usage": {
+    "status": "mirrored",
+    "symthink": {
+      "wired": false,
+      "surfaces": [
+        "My Vision → Options → Analyze reasoning (`analyze_reasoning`: a Question with a Question → Idea → Claim chain)",
+        "Shared Vision → Article mode (author and subscriber)"
+      ],
+      "sourceFiles": [
+        "symthink-io/src/prompts/articleEditorialAnalysis.ts",
+        "symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt, serializeArticleBranch)"
+      ],
+      "docs": "symthink-io/docs/developer-guide/systems/evidence-aware-article-drafting.md"
+    },
+    "pasteBack": false,
+    "notes": "symthink-io caps the assembled prompt at 40,000 characters and the branch at 15 levels before rendering."
+  }
+}

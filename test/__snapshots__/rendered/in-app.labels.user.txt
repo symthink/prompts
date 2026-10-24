@@ -1,0 +1,6 @@
+- id: n1
+  text: "How can our city reduce traffic deaths?"
+- id: n2
+  text: "Lower residential speed limits to 20 mph"
+- id: n3
+  text: "Studies call 20 mph \"survivable\" for pedestrians"

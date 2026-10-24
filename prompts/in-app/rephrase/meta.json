@@ -1,0 +1,20 @@
+{
+  "id": "in-app.rephrase",
+  "title": "Rephrase (single)",
+  "description": "Legacy single-result rephrase: returns one more eloquent, succinct version of the text.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "variables": [
+    { "name": "text", "type": "string", "required": true, "description": "Text to rephrase." }
+  ],
+  "usage": {
+    "status": "reference",
+    "symthink": {
+      "wired": false,
+      "surfaces": [],
+      "sourceFiles": ["symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (REPHRASE_TEXT_SYSTEM_PROMPT, getRephrasing)"]
+    },
+    "pasteBack": false,
+    "notes": "getRephrasing is still exported from _shared/ai but has no callers. Superseded by in-app.rephrase-options. symthink-io's getRephrasing passes its arguments to getChatGptText in the wrong order, so it sends these instructions as the user message and the text as the system message; this template uses the intended roles."
+  }
+}
