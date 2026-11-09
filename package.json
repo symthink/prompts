@@ -1,6 +1,6 @@
 {
   "name": "@symthink/prompts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Open-source AI prompt templates used by Symthink, with typed variables and Mustache interpolation.",
   "license": "Apache-2.0",
   "author": "Thomas W. Ford",
