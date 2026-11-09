@@ -22,8 +22,8 @@ audience a variable, as `editorial-analysis` does with `audience`.
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`articles.draft`](#draft) | Article draft | `external-chat` | `mirrored` | My Vision → Options → Analyze reasoning (`analyze_reasoning`, second prompt)<br>Shared Vision → Article mode (author only) |
-| [`articles.editorial-analysis`](#editorial-analysis) | Article editorial analysis | `external-chat` | `mirrored` | My Vision → Options → Analyze reasoning (`analyze_reasoning`: a Question with a Question → Idea → Claim chain)<br>Shared Vision → Article mode (author and subscriber) |
+| [`articles.draft`](#draft) | Article draft | `external-chat` | `active` | My Vision → Options → Analyze reasoning (`analyze_reasoning`, second prompt)<br>Shared Vision → Article mode (author only) |
+| [`articles.editorial-analysis`](#editorial-analysis) | Article editorial analysis | `external-chat` | `active` | My Vision → Options → Analyze reasoning (`analyze_reasoning`: a Question with a Question → Idea → Claim chain)<br>Shared Vision → Article mode (author and subscriber) |
 
 ## Prompt details
 
@@ -35,7 +35,7 @@ Prompt 2 of evidence-aware article drafting, sent in the same chat after the edi
 - **Template:** [`prompt.md`](./draft/prompt.md) · [`meta.json`](./draft/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Context-free: relies on the tree and analysis from Prompt 1 earlier in the same conversation.
 
 _No variables — the prompt is static._
@@ -48,7 +48,7 @@ Prompt 1 of evidence-aware article drafting: an editorial analyst assesses a YAM
 - **Template:** [`prompt.md`](./editorial-analysis/prompt.md) · [`meta.json`](./editorial-analysis/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Consumers typically cap the assembled prompt at 40,000 characters and the branch at 15 levels before rendering.
 
 | Variable | Type | Required | Description |

@@ -41,9 +41,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "My Vision → Ballot Research → Candidate → Options (`ballot_candidate_research`)"
       ]

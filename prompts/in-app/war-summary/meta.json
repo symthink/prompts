@@ -33,9 +33,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "process-war-refresh edge function (weekly summaries on Home → Federal representatives)",
         "GET /api/war/prompt (prompt disclosure shown to users)",

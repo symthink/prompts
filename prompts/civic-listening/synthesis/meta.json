@@ -22,9 +22,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "Civic listening session synthesis (GET /api/listening-sessions/:id/synthesis, close-session final synthesis)"
       ]

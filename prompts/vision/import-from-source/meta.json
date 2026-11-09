@@ -17,9 +17,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "My Vision → Options → Import from source URL (`import_from_article`: any Question, Idea, or Claim)"
       ]

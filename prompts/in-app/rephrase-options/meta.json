@@ -28,9 +28,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "POST /api/ai/rephrase (endpoint is live; no current client UI calls it since Rephrase left the My Vision Options menu)"
       ]

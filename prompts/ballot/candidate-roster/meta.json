@@ -23,9 +23,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "Ballot Research wizard → Contests step (BallotContestsStep)",
         "Ballot Research → Fill candidates dialog (BallotCandidatesDialog)"

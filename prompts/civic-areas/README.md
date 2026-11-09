@@ -23,8 +23,8 @@ key/value block the model sees.
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`civic-areas.orientation`](#orientation) | Civic area orientation | `symthink-api` | `mirrored` | GET /api/civic-scope/:boundaryGroupId/orientation (Civic Ladder → civic area orientation dialog) |
-| [`civic-areas.orientation-repair`](#orientation-repair) | Civic area orientation repair | `symthink-api` | `mirrored` | GET /api/civic-scope/:boundaryGroupId/orientation (retry after invalid JSON) |
+| [`civic-areas.orientation`](#orientation) | Civic area orientation | `symthink-api` | `active` | GET /api/civic-scope/:boundaryGroupId/orientation (Civic Ladder → civic area orientation dialog) |
+| [`civic-areas.orientation-repair`](#orientation-repair) | Civic area orientation repair | `symthink-api` | `active` | GET /api/civic-scope/:boundaryGroupId/orientation (retry after invalid JSON) |
 
 ## Prompt details
 
@@ -36,7 +36,7 @@ Web-search prompt that explains one civic scope on the user's Civic Ladder (what
 - **Template:** [`prompt.md`](./orientation/prompt.md) · [`meta.json`](./orientation/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Sent to the OpenAI Responses API with web search. Variable names mirror the snake_case CivicAreaOrientationContext schema so the API context can be passed through unchanged.
 
 | Variable | Type | Required | Description |
@@ -62,7 +62,7 @@ Follow-up message sent when the orientation response was not valid JSON for the 
 - **Template:** [`prompt.md`](./orientation-repair/prompt.md) · [`meta.json`](./orientation-repair/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 
 _No variables — the prompt is static._
 

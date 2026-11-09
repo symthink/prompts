@@ -33,9 +33,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "My Vision → Options → Civic research with AI (`civic_research`: a civic-level Question with a civic scope key)"
       ]

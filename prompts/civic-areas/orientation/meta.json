@@ -84,9 +84,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "GET /api/civic-scope/:boundaryGroupId/orientation (Civic Ladder → civic area orientation dialog)"
       ]

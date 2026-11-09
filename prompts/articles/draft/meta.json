@@ -8,9 +8,9 @@
   "requires": [],
   "variables": [],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "My Vision → Options → Analyze reasoning (`analyze_reasoning`, second prompt)",
         "Shared Vision → Article mode (author only)"

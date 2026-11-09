@@ -36,9 +36,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "POST /api/ballot/source-discovery (Home → Election ballot research; Ballot Research wizard)"
       ]

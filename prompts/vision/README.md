@@ -23,10 +23,10 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md). Add a prompt folder here as `visio
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`vision.civic-level-research`](#civic-level-research) | Civic research with AI | `external-chat` | `mirrored` | My Vision → Options → Civic research with AI (`civic_research`: a civic-level Question with a civic scope key) |
-| [`vision.import-from-source`](#import-from-source) | Import from source URL | `external-chat` | `mirrored` | My Vision → Options → Import from source URL (`import_from_article`: any Question, Idea, or Claim) |
-| [`vision.learning-with-ai`](#learning-with-ai) | Learning with AI | `external-chat` | `mirrored` | My Vision → Options → Learning with AI (`learning_with_ai`: a Question under a civic scope, without its own civic scope key) |
-| [`vision.research`](#research) | Research with AI | `external-chat` | `mirrored` | My Vision → Options → Research with AI (`general_research`: an Idea or Claim under a civic scope) |
+| [`vision.civic-level-research`](#civic-level-research) | Civic research with AI | `external-chat` | `active` | My Vision → Options → Civic research with AI (`civic_research`: a civic-level Question with a civic scope key) |
+| [`vision.import-from-source`](#import-from-source) | Import from source URL | `external-chat` | `active` | My Vision → Options → Import from source URL (`import_from_article`: any Question, Idea, or Claim) |
+| [`vision.learning-with-ai`](#learning-with-ai) | Learning with AI | `external-chat` | `active` | My Vision → Options → Learning with AI (`learning_with_ai`: a Question under a civic scope, without its own civic scope key) |
+| [`vision.research`](#research) | Research with AI | `external-chat` | `active` | My Vision → Options → Research with AI (`general_research`: an Idea or Claim under a civic scope) |
 
 ## Prompt details
 
@@ -38,7 +38,7 @@ Guides a two-phase conversation that explores a level of government in the user'
 - **Template:** [`prompt.md`](./civic-level-research/prompt.md) · [`meta.json`](./civic-level-research/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Paste-back is Questions only. The root bullet gets a ❓ marker when the question text has none.
 
 | Variable | Type | Required | Description |
@@ -56,7 +56,7 @@ Asks an external AI to read an article, podcast, or video and extract its most c
 - **Template:** [`prompt.md`](./import-from-source/prompt.md) · [`meta.json`](./import-from-source/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Pasted tree is attached as a new child of the Options subject (not flattened onto it).
 
 | Variable | Type | Required | Description |
@@ -71,7 +71,7 @@ Copy-paste tutor prompt that helps a person learn the concepts behind a Question
 - **Template:** [`prompt.md`](./learning-with-ai/prompt.md) · [`meta.json`](./learning-with-ai/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Copy-only workflow; there is no paste-back step.
 
 | Variable | Type | Required | Description |
@@ -89,7 +89,7 @@ Generic research prompt for an Idea, Claim, or Question in the user's tree, with
 - **Template:** [`prompt.md`](./research/prompt.md) · [`meta.json`](./research/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** The root bullet is the current node text with its type marker appended when missing.
 
 | Variable | Type | Required | Description |

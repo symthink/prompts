@@ -28,12 +28,12 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md). Pick `delivery` by who sends the p
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`ballot.candidate-research`](#candidate-research) | Ballot candidate research | `external-chat` | `mirrored` | My Vision → Ballot Research → Candidate → Options (`ballot_candidate_research`) |
-| [`ballot.candidate-roster`](#candidate-roster) | Ballot candidate roster | `external-chat` | `mirrored` | Ballot Research wizard → Contests step (BallotContestsStep)<br>Ballot Research → Fill candidates dialog (BallotCandidatesDialog) |
-| [`ballot.contest-research`](#contest-research) | Ballot contest research | `external-chat` | `mirrored` | My Vision → Ballot Research → Contest → Options (`ballot_contest_research`) |
-| [`ballot.question-research`](#question-research) | Ballot question research | `external-chat` | `mirrored` | My Vision → Ballot Research → Ballot question → Options (`ballot_question_research`) |
-| [`ballot.source-discovery`](#source-discovery) | Ballot source discovery | `symthink-api` | `mirrored` | POST /api/ballot/source-discovery (Home → Election ballot research; Ballot Research wizard) |
-| [`ballot.upcoming-elections`](#upcoming-elections) | Upcoming elections discovery | `symthink-api` | `mirrored` | POST /api/ballot/upcoming-elections (Home → Election ballot research) |
+| [`ballot.candidate-research`](#candidate-research) | Ballot candidate research | `external-chat` | `active` | My Vision → Ballot Research → Candidate → Options (`ballot_candidate_research`) |
+| [`ballot.candidate-roster`](#candidate-roster) | Ballot candidate roster | `external-chat` | `active` | Ballot Research wizard → Contests step (BallotContestsStep)<br>Ballot Research → Fill candidates dialog (BallotCandidatesDialog) |
+| [`ballot.contest-research`](#contest-research) | Ballot contest research | `external-chat` | `active` | My Vision → Ballot Research → Contest → Options (`ballot_contest_research`) |
+| [`ballot.question-research`](#question-research) | Ballot question research | `external-chat` | `active` | My Vision → Ballot Research → Ballot question → Options (`ballot_question_research`) |
+| [`ballot.source-discovery`](#source-discovery) | Ballot source discovery | `symthink-api` | `active` | POST /api/ballot/source-discovery (Home → Election ballot research; Ballot Research wizard) |
+| [`ballot.upcoming-elections`](#upcoming-elections) | Upcoming elections discovery | `symthink-api` | `active` | POST /api/ballot/upcoming-elections (Home → Election ballot research) |
 
 ## Prompt details
 
@@ -45,7 +45,7 @@ Researches one candidate on the user's imported ballot using public record, camp
 - **Template:** [`prompt.md`](./candidate-research/prompt.md) · [`meta.json`](./candidate-research/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -63,7 +63,7 @@ Fills in verified candidate names (and any missing ballot-question titles) for e
 - **Template:** [`prompt.md`](./candidate-roster/prompt.md) · [`meta.json`](./candidate-roster/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Uses its own roster-specific paste-back contract instead of the shared partial. A blank line follows every election block, including after the last one.
 
 | Variable | Type | Required | Description |
@@ -79,7 +79,7 @@ Researches one contest on the user's imported ballot: verified candidates, their
 - **Template:** [`prompt.md`](./contest-research/prompt.md) · [`meta.json`](./contest-research/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Indentation of the verified-candidate list is normalized to three spaces for every name.
 
 | Variable | Type | Required | Description |
@@ -97,7 +97,7 @@ Finds the official text of a ballot measure, public arguments for and against, a
 - **Template:** [`prompt.md`](./question-research/prompt.md) · [`meta.json`](./question-research/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** The street-safety and root-line examples are separate fenced blocks rather than one nested inside the other.
 
 | Variable | Type | Required | Description |
@@ -114,7 +114,7 @@ Web-search prompt that finds official sample-ballot or voter-lookup pages for th
 - **Template:** [`prompt.md`](./source-discovery/prompt.md) · [`meta.json`](./source-discovery/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Sent to the OpenAI Responses API with web search. Blank lines between the jurisdiction, elections, and saved-context blocks are now consistent.
 
 | Variable | Type | Required | Description |
@@ -132,7 +132,7 @@ Web-search prompt that lists the next upcoming election events (one row per even
 - **Template:** [`prompt.md`](./upcoming-elections/prompt.md) · [`meta.json`](./upcoming-elections/meta.json)
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** Sent to the OpenAI Responses API with web search. Blank lines around the jurisdiction and Google Civic elections blocks are consistent throughout.
 
 | Variable | Type | Required | Description |

@@ -9,9 +9,9 @@
   "outputSchema": true,
   "variables": [],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "GET /api/civic-scope/:boundaryGroupId/orientation (retry after invalid JSON)"
       ]

@@ -16,9 +16,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "POST /api/ai/metadata (citation resolver, when the source URL is a PDF)"
       ]

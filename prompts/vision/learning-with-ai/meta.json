@@ -33,9 +33,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "My Vision → Options → Learning with AI (`learning_with_ai`: a Question under a civic scope, without its own civic scope key)"
       ]

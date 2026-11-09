@@ -22,7 +22,7 @@ put names, emails, or other identifying details into fixtures.
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`civic-listening.synthesis`](#synthesis) | Civic listening synthesis | `symthink-api` | `mirrored` | Civic listening session synthesis (GET /api/listening-sessions/:id/synthesis, close-session final synthesis) |
+| [`civic-listening.synthesis`](#synthesis) | Civic listening synthesis | `symthink-api` | `active` | Civic listening session synthesis (GET /api/listening-sessions/:id/synthesis, close-session final synthesis) |
 
 ## Prompt details
 
@@ -34,7 +34,7 @@ Clusters anonymous community submissions into a Symthink JSON tree of themed Cla
 - **Template:** [`system.md`](./synthesis/system.md), [`user.md`](./synthesis/user.md) · [`meta.json`](./synthesis/meta.json)
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** The user message is compact JSON (submissionCount, submissions, exampleShape). The API enforces JSON with response_format, and the server checks that quote leaves are verbatim.
 
 | Variable | Type | Required | Description |

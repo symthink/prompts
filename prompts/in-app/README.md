@@ -21,12 +21,12 @@ workflow with its own domain language (ballot, civic areas, …), give it its ow
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
-| [`in-app.labels`](#labels) | Make labels | `symthink-api` | `mirrored` | My Vision → Options → Make labels (`make_labels`) → POST /api/ai/make-labels |
-| [`in-app.pdf-citation`](#pdf-citation) | PDF citation extraction | `symthink-api` | `mirrored` | POST /api/ai/metadata (citation resolver, when the source URL is a PDF) |
+| [`in-app.labels`](#labels) | Make labels | `symthink-api` | `active` | My Vision → Options → Make labels (`make_labels`) → POST /api/ai/make-labels |
+| [`in-app.pdf-citation`](#pdf-citation) | PDF citation extraction | `symthink-api` | `active` | POST /api/ai/metadata (citation resolver, when the source URL is a PDF) |
 | [`in-app.rephrase`](#rephrase) | Rephrase (single) | `symthink-api` | `reference` | — |
-| [`in-app.rephrase-options`](#rephrase-options) | Rephrase options | `symthink-api` | `mirrored` | POST /api/ai/rephrase (endpoint is live; no current client UI calls it since Rephrase left the My Vision Options menu) |
+| [`in-app.rephrase-options`](#rephrase-options) | Rephrase options | `symthink-api` | `active` | POST /api/ai/rephrase (endpoint is live; no current client UI calls it since Rephrase left the My Vision Options menu) |
 | [`in-app.single-label`](#single-label) | Single label | `symthink-api` | `reference` | — |
-| [`in-app.war-summary`](#war-summary) | Weekly legislative activity report | `symthink-api` | `mirrored` | process-war-refresh edge function (weekly summaries on Home → Federal representatives)<br>GET /api/war/prompt (prompt disclosure shown to users)<br>ETL/summarize-legislation.mts |
+| [`in-app.war-summary`](#war-summary) | Weekly legislative activity report | `symthink-api` | `active` | process-war-refresh edge function (weekly summaries on Home → Federal representatives)<br>GET /api/war/prompt (prompt disclosure shown to users)<br>ETL/summarize-legislation.mts |
 
 ## Prompt details
 
@@ -38,7 +38,7 @@ Generates a short (max 30 character) sentence-case label for each tree node in o
 - **Template:** [`system.md`](./labels/system.md), [`user.md`](./labels/user.md) · [`meta.json`](./labels/meta.json)
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -52,7 +52,7 @@ Extracts CSL-shaped citation metadata (title, authors, date, publisher, affiliat
 - **Template:** [`system.md`](./pdf-citation/system.md), [`user.md`](./pdf-citation/user.md) · [`meta.json`](./pdf-citation/meta.json)
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -81,7 +81,7 @@ Returns three type-aware rephrasings of a tree node (questions stay questions, c
 - **Template:** [`system.md`](./rephrase-options/system.md), [`user.md`](./rephrase-options/user.md) · [`meta.json`](./rephrase-options/meta.json)
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** The type-specific rule sits on its own line instead of being folded into one system paragraph. Character limit is the `maxChars` variable (default 280) rather than a hard-coded cap with server-side truncation.
 
 | Variable | Type | Required | Description |
@@ -113,7 +113,7 @@ Writes a 150–250 word nonpartisan, wire-service-style summary of a legislator'
 - **Template:** [`system.md`](./war-summary/system.md), [`user.md`](./war-summary/user.md) · [`meta.json`](./war-summary/meta.json)
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
-- **Wired in Symthink from this package:** not yet
+- **Wired in Symthink from this package:** yes
 - **Notes:** The system prompt is also displayed verbatim to users as a transparency disclosure.
 
 | Variable | Type | Required | Description |

@@ -54,9 +54,9 @@
     }
   ],
   "usage": {
-    "status": "mirrored",
+    "status": "active",
     "symthink": {
-      "wired": false,
+      "wired": true,
       "surfaces": [
         "POST /api/ballot/upcoming-elections (Home → Election ballot research)"
       ]
