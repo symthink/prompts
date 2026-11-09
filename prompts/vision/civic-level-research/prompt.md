@@ -3,6 +3,9 @@ I'm exploring civic opportunities and challenges at a specific level of governme
 Jurisdiction context:
 - Level: {{levelLabel}}
 - Semantic type: {{semanticType}}
+{{#showGroupedLegislativeNote}}
+- Note: Upper and lower state legislative chambers share this district boundary in my jurisdiction.
+{{/showGroupedLegislativeNote}}
 {{#jurisdiction}}
 - Resolved place name: {{placeName}}
 {{#districtNumber}}

@@ -18,13 +18,14 @@ export const civicLevelResearch = definePrompt({
       .nullish(),
     questionText: nonEmpty,
   }),
-  view: ({ jurisdiction, questionText }) => ({
+  view: ({ jurisdiction, questionText, semanticType }) => ({
     // Mustache treats 0 as falsy, so the district is passed as text.
     jurisdiction: jurisdiction && {
       ...jurisdiction,
       districtNumber: jurisdiction.districtNumber == null ? undefined : String(jurisdiction.districtNumber),
     },
     rootBulletBody: questionText.includes(SYM_QUESTION) ? questionText : `${questionText}${SYM_QUESTION}`,
+    showGroupedLegislativeNote: semanticType === 'State Legislative Districts',
   }),
 });
 
