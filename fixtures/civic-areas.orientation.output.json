@@ -1,0 +1,20 @@
+{
+  "overview": "Example Township is a general-purpose municipality that delivers local services.",
+  "responsibilities": "Maintains streets, parks, and zoning within township limits.",
+  "decision_makers": "A five-member board of trustees sets policy; a manager runs day-to-day operations.",
+  "resident_participation": "Residents may comment at monthly board meetings and petition for ballot measures.",
+  "get_involved": [
+    {
+      "title": "Attend a board meeting",
+      "description": "Sign up for the public comment list before the meeting.",
+      "url": "https://exampletown.gov/meetings"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Example Township charter",
+      "url": "https://exampletown.gov/charter",
+      "publisher": "Example Township Clerk"
+    }
+  ]
+}

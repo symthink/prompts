@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import Mustache from 'mustache';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -5,9 +8,10 @@ import { z } from 'zod';
 import { bundle as externalChatBundle } from '../src/generated/external-chat.js';
 import { bundle as symthinkApiBundle } from '../src/generated/symthink-api.js';
 import { promptMetaSchema } from '../src/registry/meta-schema.js';
+import { outputSchemasByPromptId } from '../src/registry/output-schemas.js';
 import { promptRegistry } from '../src/registry/index.js';
 import { buildView } from '../src/render/engine.js';
-import { definitionsByDelivery, loadFixtures } from './helpers.js';
+import { definitionsByDelivery, loadFixtures, PACKAGE_ROOT } from './helpers.js';
 
 const bundles = { 'external-chat': externalChatBundle, 'symthink-api': symthinkApiBundle };
 const fixtures = loadFixtures();
@@ -109,7 +113,19 @@ describe.each(promptRegistry)('$id', (meta) => {
 
   it('only uses template names that the variables or view provide', () => {
     const available = availableNames(meta);
-    const unknown = Object.values(bundles[meta.delivery].templates[meta.id] ?? {}).flatMap((template) =>
+    const parts = bundles[meta.delivery].templates[meta.id] ?? {};
+    const templateStrings =
+      meta.output === 'decision'
+        ? [
+            ...(typeof parts.state === 'string' ? [parts.state] : []),
+            ...Object.values(
+              (parts.questions ?? {}) as Record<string, { instructions?: string }>,
+            )
+              .map((question) => question.instructions)
+              .filter((instructions): instructions is string => typeof instructions === 'string'),
+          ]
+        : Object.values(parts).filter((value): value is string => typeof value === 'string');
+    const unknown = templateStrings.flatMap((template) =>
       [...templateNames(template).names].filter((name) => !available.has(name)),
     );
     expect(unknown).toEqual([]);
@@ -138,6 +154,34 @@ describe('partials', () => {
     const unknown = [...templateNames(partialSources.get(partial)!).names].filter((name) => !available.has(name));
     expect(unknown).toEqual([]);
   });
+});
+
+describe('runtime metadata', () => {
+  it('documents outputFormat and requires on every prompt', () => {
+    for (const meta of promptRegistry) {
+      expect(meta.outputFormat, meta.id).toMatch(/^(paste-back-markdown|json|text|decision)$/);
+      expect(Array.isArray(meta.requires), meta.id).toBe(true);
+    }
+  });
+
+  it('sets outputSchema only for JSON prompts that export a schema', () => {
+    for (const meta of promptRegistry) {
+      const exported = meta.id in outputSchemasByPromptId;
+      expect(meta.outputSchema === true, meta.id).toBe(exported);
+      if (meta.outputFormat !== 'json') {
+        expect(meta.outputSchema, meta.id).toBeUndefined();
+      }
+    }
+  });
+
+  it.each(Object.entries(outputSchemasByPromptId))(
+    'output schema for %s parses its sample fixture',
+    (id, schema) => {
+      const fixturePath = path.join(PACKAGE_ROOT, 'fixtures', `${id}.output.json`);
+      const sample = JSON.parse(readFileSync(fixturePath, 'utf8'));
+      expect(schema.safeParse(sample).success, `${id}.output.json`).toBe(true);
+    },
+  );
 });
 
 describe('entrypoints', () => {

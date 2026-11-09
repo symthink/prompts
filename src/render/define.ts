@@ -1,11 +1,15 @@
 import type { z } from 'zod';
 
-export type PromptOutput = 'single' | 'system_user';
+import type { DecisionPrompt } from './decision-questions.js';
+
+export type PromptOutput = 'single' | 'system_user' | 'decision';
 
 export interface SystemUserPrompt {
   system: string;
   user: string;
 }
+
+export type { DecisionPrompt, DecisionQuestion, DecisionQuestionType, DecisionQuestionsSpec } from './decision-questions.js';
 
 export interface PromptDefinition<
   S extends z.ZodType = z.ZodType,
@@ -33,5 +37,7 @@ export type PromptResult<D> =
   D extends PromptDefinition<z.ZodType, infer O>
     ? O extends 'system_user'
       ? SystemUserPrompt
-      : string
+      : O extends 'decision'
+        ? DecisionPrompt
+        : string
     : never;

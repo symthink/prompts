@@ -1,0 +1,9 @@
+{
+  "title": "Sample municipal climate plan",
+  "author": [{ "family": "Nguyen", "given": "Alex" }],
+  "issued": { "date-parts": [[2024, 6]] },
+  "container-title": "Journal of Example Policy",
+  "publisher": "Example University; Civic Research Lab",
+  "type": "article-journal",
+  "DOI": "10.5555/example-plan"
+}

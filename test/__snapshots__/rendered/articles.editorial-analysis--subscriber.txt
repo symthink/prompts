@@ -124,10 +124,14 @@ Briefly identify the 2–3 factors that most influenced the overall score.
 
 Do not write the article yet.
 
-type: question
-label: Library hours
-text: Should branch libraries open on Sundays?
+type: Question
+label: Question
+text: Should the town adopt a stormwater fee❓
 support:
-  - type: claim
-    label: Demand
-    text: Weekend visits rose 18% after Saturday hours were extended.
+  - type: Idea
+    label: Benefit
+    text: Dedicated funding for drainage upgrades💡
+    support:
+      - type: Claim
+        label: Evidence
+        text: Nearby towns reduced flood claims after similar fees🕫

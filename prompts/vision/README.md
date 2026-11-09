@@ -39,8 +39,6 @@ Guides a two-phase conversation that explores a level of government in the user'
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/civicLevelAiResearchContext.helpers.ts (buildCivicLevelResearchPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/my-vision-options-menu.md`
 - **Notes:** Paste-back is Questions only. The root bullet gets a ❓ marker when the question text has none.
 
 | Variable | Type | Required | Description |
@@ -59,8 +57,6 @@ Asks an external AI to read an article, podcast, or video and extract its most c
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/prompts/importFromArticle.ts`, `symthink-io/src/utils/importFromArticlePrompt.builder.ts`, `symthink-io/src/utils/pasteBackContract.helpers.ts`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/my-vision-options-menu.md`
 - **Notes:** Pasted tree is attached as a new child of the Options subject (not flattened onto it).
 
 | Variable | Type | Required | Description |
@@ -76,8 +72,6 @@ Copy-paste tutor prompt that helps a person learn the concepts behind a Question
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/prompts/learningWithAi.ts`, `symthink-io/src/utils/learningWithAiPrompt.builder.ts`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/learning-with-ai.md`
 - **Notes:** Copy-only workflow; there is no paste-back step.
 
 | Variable | Type | Required | Description |
@@ -96,8 +90,6 @@ Generic research prompt for an Idea, Claim, or Question in the user's tree, with
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/ai.store.ts (buildResearchPrompt, assembleResearchPromptBody)`, `symthink-io/src/utils/pasteBackContract.helpers.ts`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/my-vision-options-menu.md`
 - **Notes:** The root bullet is the current node text with its type marker appended when missing.
 
 | Variable | Type | Required | Description |

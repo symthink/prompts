@@ -35,9 +35,7 @@ Clusters anonymous community submissions into a Symthink JSON tree of themed Cla
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/civic-listening/synthesis-prompts.ts (buildPrompt)`, `symthink-io/supabase/functions/_shared/civic-listening/run-synthesis.ts`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/civic-listening.md`
-- **Notes:** The user message is a JSON payload. This template pretty-prints it; symthink-io sends the same payload as compact JSON. The API also enforces JSON with response_format, and the server checks that quote leaves are verbatim.
+- **Notes:** The user message is compact JSON (submissionCount, submissions, exampleShape). The API enforces JSON with response_format, and the server checks that quote leaves are verbatim.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|

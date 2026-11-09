@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { definePrompt, type PromptVars } from '../../render/define.js';
-import { nonEmpty, optionalText } from '../shared.js';
+import { buildContestCandidateVerificationStep, nonEmpty, optionalText } from '../shared.js';
 
 export const contestResearch = definePrompt({
   id: 'ballot.contest-research',
@@ -11,6 +11,9 @@ export const contestResearch = definePrompt({
     electionDay: optionalText,
     contestTitle: nonEmpty,
     contestCandidates: z.array(nonEmpty).default([]),
+  }),
+  view: ({ contestCandidates }) => ({
+    candidateVerificationStep: buildContestCandidateVerificationStep(contestCandidates),
   }),
 });
 

@@ -1,11 +1,6 @@
 {
   "nodeType": "question",
-  "ancestorLines": [
-    "Transportation: How can our city reduce traffic deaths❓"
-  ],
-  "currentText": "Street design: Which street changes reduce crashes the most❓",
-  "childLines": [
-    "Speed humps: Add speed humps near schools💡",
-    "Protected lanes: Separate bike lanes from traffic💡"
-  ]
+  "ancestorLines": ["My civic vision:", "Transportation:"],
+  "currentText": "How can we calm traffic on Oak Street?",
+  "childLines": ["Safer crossings for students.", "Speed limits near schools matter!"]
 }

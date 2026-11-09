@@ -1,31 +1,29 @@
 {
-  "boundary_group_id": "bg_il_sldu_12",
-  "name": "Illinois State Senate District 12",
-  "authoring_scope_key": "sld_upper",
+  "boundary_group_id": "bg-mn-sld-19",
+  "name": "State Legislative Districts 19",
+  "authoring_scope_key": "state_legislative_district",
   "representation_topology": "coterminous_legislative_district",
-  "country": "US",
-  "state_or_equivalent": "IL",
-  "level_display": "State Legislative District",
-  "parent_areas": [
-    { "semantic_type": "state", "name": "Illinois" }
-  ],
-  "scope_identifiers": { "state_fips": "17", "district": "012" },
+  "country": "United States",
+  "state_or_equivalent": "MN",
+  "level_display": "State Legislative Districts — State Legislative Districts 19",
+  "parent_areas": [{ "semantic_type": "state", "name": "Minnesota" }],
   "ladder_members": [
     {
       "semantic_type": "sld_upper",
-      "name": "State Senate District 12",
-      "civic_area_id": "ca_il_sldu_12",
-      "identifiers": { "geoid": "17012" }
+      "name": "Senate District 19",
+      "civic_area_id": "sldu-2719",
+      "identifiers": { "geoid": "sldu-2719" }
     },
     {
       "semantic_type": "sld_lower",
-      "name": "State House District 23",
-      "civic_area_id": "ca_il_sldl_23"
+      "name": "House District 19",
+      "civic_area_id": "sldl-2719",
+      "identifiers": { "geoid": "sldl-2719" }
     }
   ],
   "representation_channels": [
-    { "representation_role": "state_senator", "chamber": "upper", "district_code": "12", "seat_count": 1 },
-    { "representation_role": "state_representative", "chamber": "lower", "district_code": "23", "seat_count": 1 }
-  ],
-  "additional_context": "The upper district contains two whole lower districts."
+    { "representation_role": "upper", "chamber": "upper", "district_code": "19", "seat_count": 1 },
+    { "representation_role": "lower", "chamber": "lower", "district_code": "19", "seat_count": 1 },
+    { "representation_role": "sld_lower", "seat_count": 1 }
+  ]
 }

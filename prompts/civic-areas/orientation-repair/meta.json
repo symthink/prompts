@@ -4,13 +4,17 @@
   "description": "Follow-up message sent when the orientation response was not valid JSON for the expected schema.",
   "delivery": "symthink-api",
   "output": "single",
+  "outputFormat": "json",
+  "requires": [],
+  "outputSchema": true,
   "variables": [],
   "usage": {
     "status": "mirrored",
     "symthink": {
       "wired": false,
-      "surfaces": ["GET /api/civic-scope/:boundaryGroupId/orientation (retry after invalid JSON)"],
-      "sourceFiles": ["symthink-io/supabase/functions/_shared/services/civic-area-orientation/prompt.ts (buildCivicAreaOrientationRepairPrompt)"]
+      "surfaces": [
+        "GET /api/civic-scope/:boundaryGroupId/orientation (retry after invalid JSON)"
+      ]
     },
     "pasteBack": false
   }

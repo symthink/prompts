@@ -1,3 +1,5 @@
 {
-  "questionText": "What causes inflation❓"
+  "ancestorLines": ["Vision:"],
+  "questionText": "How does our city council set the budget?",
+  "childLines": ["Idea: Property tax revenue."]
 }

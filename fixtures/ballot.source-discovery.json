@@ -1,12 +1,5 @@
 {
-  "location": "Springfield, IL 62701",
-  "districts": [
-    { "type": "Congressional district", "name": "Illinois's 13th congressional district" },
-    { "type": "State senate district", "name": "Illinois State Senate District 12" },
-    { "type": "County", "name": "Sangamon County" }
-  ],
-  "civicElections": [
-    { "name": "Illinois Midterm General Election", "electionDay": "2026-11-03" }
-  ],
-  "savedContext": null
+  "location": "Anadarko, Caddo County, OK, ZIP 73005",
+  "districts": [{ "type": "congressional_district", "name": "Congressional District 3" }],
+  "civicElections": [{ "name": "Oklahoma Midterm General Election", "electionDay": "2026-11-03" }]
 }

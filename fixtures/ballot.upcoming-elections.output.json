@@ -1,0 +1,15 @@
+{
+  "elections": [
+    {
+      "name": "Example City General Election",
+      "electionDay": "2026-11-03",
+      "datePrecision": "day",
+      "scheduledLabel": "Tuesday, November 3, 2026",
+      "kind": "general",
+      "confidence": "high",
+      "sourceUrl": "https://elections.example.gov/2026-general",
+      "summary": "City council and school board seats on the ballot."
+    }
+  ],
+  "warnings": []
+}

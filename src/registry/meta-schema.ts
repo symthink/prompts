@@ -8,7 +8,10 @@ export const promptMetaSchema = z.strictObject({
   title: z.string().min(1),
   description: z.string().min(1),
   delivery: z.enum(['external-chat', 'symthink-api']),
-  output: z.enum(['single', 'system_user']),
+  output: z.enum(['single', 'system_user', 'decision']),
+  outputFormat: z.enum(['paste-back-markdown', 'json', 'text', 'decision']),
+  requires: z.array(z.enum(['web_search'])),
+  outputSchema: z.literal(true).optional(),
   variables: z.array(
     z.strictObject({
       name: z.string().min(1),
@@ -22,8 +25,6 @@ export const promptMetaSchema = z.strictObject({
     symthink: z.strictObject({
       wired: z.boolean(),
       surfaces: z.array(z.string().min(1)),
-      sourceFiles: z.array(z.string().min(1)),
-      docs: z.string().min(1).optional(),
     }),
     pasteBack: z.boolean(),
     notes: z.string().min(1).optional(),

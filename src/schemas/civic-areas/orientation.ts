@@ -63,3 +63,33 @@ export const orientation = definePrompt({
 });
 
 export type OrientationVars = PromptVars<typeof orientation>;
+
+const orientationGetInvolvedItemSchema = z
+  .object({
+    title: z.string(),
+    description: z.string(),
+    url: z.string().url().nullable(),
+  })
+  .passthrough();
+
+const orientationSourceSchema = z
+  .object({
+    title: z.string(),
+    url: z.string().url(),
+    publisher: z.string().nullable(),
+  })
+  .passthrough();
+
+/** Mirrors symthink-io `CivicAreaOrientationPayloadSchema`. */
+export const orientationOutputSchema = z
+  .object({
+    overview: z.string(),
+    responsibilities: z.string(),
+    decision_makers: z.string(),
+    resident_participation: z.string(),
+    get_involved: z.array(orientationGetInvolvedItemSchema),
+    sources: z.array(orientationSourceSchema),
+  })
+  .passthrough();
+
+export type OrientationOutput = z.infer<typeof orientationOutputSchema>;

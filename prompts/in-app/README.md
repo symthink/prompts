@@ -39,7 +39,6 @@ Generates a short (max 30 character) sentence-case label for each tree node in o
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (MULTI_LABEL_SYSTEM_PROMPT, makeLabelsInline)`
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -54,7 +53,6 @@ Extracts CSL-shaped citation metadata (title, authors, date, publisher, affiliat
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/capabilities/pdf-citation.ts (PDF_CITATION_SYSTEM_PROMPT)`, `symthink-io/supabase/functions/_shared/pdf-citation-resolver.ts`
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -69,8 +67,7 @@ Legacy single-result rephrase: returns one more eloquent, succinct version of th
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (REPHRASE_TEXT_SYSTEM_PROMPT, getRephrasing)`
-- **Notes:** getRephrasing is still exported from _shared/ai but has no callers. Superseded by in-app.rephrase-options. symthink-io's getRephrasing passes its arguments to getChatGptText in the wrong order, so it sends these instructions as the user message and the text as the system message; this template uses the intended roles.
+- **Notes:** Reference-only: Superseded by in-app.rephrase-options. The legacy single-option rephrase API swapped system and user roles when calling the chat helper; this template keeps instructions in the system message and the text in the user message.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -85,8 +82,7 @@ Returns three type-aware rephrasings of a tree node (questions stay questions, c
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (buildRephraseSystemPrompt, getRephraseOptions)`
-- **Notes:** symthink-io joins the system prompt into one paragraph; this template puts the type-specific rule on its own line. symthink-io fixes the limit at 280 characters (and truncates longer options); here it is the `maxChars` variable, defaulting to 280.
+- **Notes:** The type-specific rule sits on its own line instead of being folded into one system paragraph. Character limit is the `maxChars` variable (default 280) rather than a hard-coded cap with server-side truncation.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -103,8 +99,7 @@ Legacy single-node label generator returning `{ label }` JSON.
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (SINGLE_LABEL_SYSTEM_PROMPT, getTextLabel)`
-- **Notes:** getTextLabel is still exported from _shared/ai but has no callers. Superseded by in-app.labels.
+- **Notes:** Reference-only: Superseded by in-app.labels for multi-label flows.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -119,7 +114,6 @@ Writes a 150–250 word nonpartisan, wire-service-style summary of a legislator'
 - **Output:** `system_user` (returns `{ system, user }`)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/ai/prompts/war.ts (WAR_SYSTEM_PROMPT)`, `symthink-io/supabase/functions/_shared/ai/capabilities/war-summary.ts (generateWarSummary)`
 - **Notes:** The system prompt is also displayed verbatim to users as a transparency disclosure.
 
 | Variable | Type | Required | Description |

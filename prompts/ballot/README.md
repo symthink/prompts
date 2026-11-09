@@ -46,8 +46,6 @@ Researches one candidate on the user's imported ballot using public record, camp
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotCandidateResearchPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/ballot-research.md`
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -66,9 +64,7 @@ Fills in verified candidate names (and any missing ballot-question titles) for e
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/ballotCandidateRoster.helpers.ts (buildBallotCandidateRosterPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/ballot-research.md`
-- **Notes:** Uses its own roster-specific paste-back contract instead of the shared partial. A blank line now follows every election block; the symthink-io source omits it after the last election.
+- **Notes:** Uses its own roster-specific paste-back contract instead of the shared partial. A blank line follows every election block, including after the last one.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -84,9 +80,7 @@ Researches one contest on the user's imported ballot: verified candidates, their
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotContestResearchPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/ballot-research.md`
-- **Notes:** Indentation of the verified-candidate list is normalized to three spaces for every name; the symthink-io source only indents the first name consistently.
+- **Notes:** Indentation of the verified-candidate list is normalized to three spaces for every name.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -104,9 +98,7 @@ Finds the official text of a ballot measure, public arguments for and against, a
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** yes
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotQuestionResearchPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/ballot-research.md`
-- **Notes:** The symthink-io source nests the street-safety example fence inside the root-line example fence. This template keeps both examples as two separate fenced blocks.
+- **Notes:** The street-safety and root-line examples are separate fenced blocks rather than one nested inside the other.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -123,8 +115,6 @@ Web-search prompt that finds official sample-ballot or voter-lookup pages for th
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/services/ballot-source-discovery.ts (buildDiscoveryPrompt)`, `symthink-io/supabase/functions/_shared/services/ballot-civic-context.ts (formatCivicJurisdictionPromptBlock)`, `symthink-io/supabase/functions/_shared/services/ballot-civic.service.ts (formatCivicElectionsForPrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/ballot-research.md`
 - **Notes:** Sent to the OpenAI Responses API with web search. Blank lines between the jurisdiction, elections, and saved-context blocks are now consistent.
 
 | Variable | Type | Required | Description |
@@ -143,8 +133,7 @@ Web-search prompt that lists the next upcoming election events (one row per even
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/services/upcoming-elections-discovery.ts (buildUpcomingElectionsPrompt)`
-- **Notes:** Sent to the OpenAI Responses API with web search. Same wording as symthink-io; blank lines around the jurisdiction and Google Civic elections blocks are now consistent (symthink-io omits some of them).
+- **Notes:** Sent to the OpenAI Responses API with web search. Blank lines around the jurisdiction and Google Civic elections blocks are consistent throughout.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|

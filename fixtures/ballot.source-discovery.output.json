@@ -1,0 +1,15 @@
+{
+  "recommended": {
+    "url": "https://elections.example.gov/2026/sample-ballot",
+    "host": "elections.example.gov",
+    "sourceAgency": "Example County Elections Office",
+    "sourceType": "sample_ballot_pdf",
+    "confidence": "high",
+    "officialDomainStatus": "official_election_board_domain",
+    "reason": "Official sample ballot linked from the county elections homepage.",
+    "requiresManualInfo": ["precinct"],
+    "privacyInstruction": "Do not submit your full ballot serial number in this chat."
+  },
+  "alternates": [],
+  "warnings": []
+}

@@ -5,15 +5,10 @@ You are a patient tutor helping me learn concepts relevant to a Question in my p
 - Do not overwhelm me with info in one response, teach iteratively with periodic knowledge checks.
 - Also allow me to periodically steer the learning by offering options. e.g. "Next we can cover X or Y"
 
-Civic context: County level of government
-Place — Springfield County
+Civic context: State level of government
 
 Context (ancestor nodes in my tree):
-Budget: How should we fund transit❓
+Vision:
 
 Question I am exploring:
-Should we expand bus service❓
-
-What I am already exploring beneath this Question (not verified):
-- Ridership data: Weekday routes are at capacity💡
-- Cost: Each new route needs two additional drivers🕫
+Maryland?

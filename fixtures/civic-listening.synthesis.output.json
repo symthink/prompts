@@ -1,0 +1,24 @@
+{
+  "id": "synthesis-root",
+  "typeInt": 4,
+  "type": "CLM",
+  "text": "Community priorities",
+  "support": [
+    {
+      "id": "theme-1",
+      "typeInt": 4,
+      "type": "CLM",
+      "text": "Safer crossings near schools",
+      "metadata": { "sourceSubmissionIds": [1, 2] },
+      "support": [
+        {
+          "id": "quote-1",
+          "typeInt": 4,
+          "type": "CLM",
+          "text": "We need a crosswalk at Oak and 3rd.",
+          "metadata": { "_isRawQuote": true }
+        }
+      ]
+    }
+  ]
+}

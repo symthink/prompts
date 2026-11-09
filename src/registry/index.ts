@@ -1,7 +1,23 @@
 import { promptRegistry } from '../generated/registry.js';
 import type { PromptDelivery, PromptMeta } from './types.js';
 
-export type { PromptDelivery, PromptMeta, PromptUsage, PromptVariableMeta, UsageStatus } from './types.js';
+export type {
+  PromptCapability,
+  PromptDelivery,
+  PromptMeta,
+  PromptOutputFormat,
+  PromptUsage,
+  PromptVariableMeta,
+  UsageStatus,
+} from './types.js';
+export type {
+  DecisionPrompt,
+  DecisionQuestion,
+  DecisionQuestionType,
+  DecisionQuestionsSpec,
+} from '../render/decision-questions.js';
+export type { JsonPromptWithOutputSchema } from './output-schemas.js';
+export { outputSchemasByPromptId } from './output-schemas.js';
 export { promptRegistry };
 
 export function getPromptMeta(id: string): PromptMeta | undefined {

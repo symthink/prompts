@@ -1,18 +1,18 @@
 I'm researching my official election ballot and need source-backed help.
 
 Ballot context:
-- Election: Illinois Midterm General Election
+- Election: General Election 2026
 - Election day: 2026-11-03
-- Contest: U.S. Representative, District 13
+- Contest: Governor
 
 Use only public, authoritative sources. Do not invent positions, endorsements, or ballot text.
 
 Candidate I am researching:
-Jordan Rivera
+Grace Hopper
 
 Please research this candidate in the context of this election and contest. Focus on public record, campaign website, official filings, endorsements, prior office experience, and notable public statements. Cite authoritative links and avoid partisan spin or invented positions.
 
-Federal Election Commission profile: https://www.fec.gov/data/candidate/H6IL13999/
+Federal Election Commission profile: https://www.fec.gov/data/candidate/H1/
 
 PASTE-BACK CONTRACT (read first)
 
@@ -43,7 +43,7 @@ When I send Ready for paste-back, your entire reply must be exactly one fenced m
 
 Example structure (inside your paste-back fenced markdown block):
 ```markdown
-- Jordan Rivera💡
+- Grace Hopper💡
   - Prior office: Served on the town council before this campaign.🕫
     - source: https://example.org/source
 ```

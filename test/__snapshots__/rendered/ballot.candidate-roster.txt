@@ -11,24 +11,13 @@ Do not include campaign websites, issue positions, or job responsibilities. Cand
 If you cannot verify the candidate list for a contest, omit that contest entirely from your answer.
 
 Contests and questions from the sample ballot parse:
-Election: Illinois Democratic Primary Election
-Election day: 2026-03-17
-Ballot style: Style 14
-Party ballot: Democratic
-Governor
-Instructions: Vote for 1
-State Senator, District 12
-Instructions: Vote for 1
-
-Election: Illinois Midterm General Election
+Election: General Election 2026
 Election day: 2026-11-03
-U.S. Representative, District 13
-County Board Member, District 4
-Instructions: Vote for not more than 2
-Springfield Library Facilities Bond Question
-Choice: Yes / No
-
-Official sample-ballot source: https://elections.example.gov/sample-ballots/2026
+Contest: Governor
+Instructions: Vote for one
+Question: Parks bond measure
+Choice: For / Against
+Official sample-ballot source: https://elections.example.gov/sample-ballot
 
 Paste-back contract (strict):
 - Reply with ONLY one fenced markdown code block — nothing before or after it.

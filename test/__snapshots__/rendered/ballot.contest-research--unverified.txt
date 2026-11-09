@@ -1,8 +1,9 @@
 I'm researching my official election ballot and need source-backed help.
 
 Ballot context:
-- Election: Springfield Municipal Election
-- Contest: Park District Commissioner
+- Election: General Election 2026
+- Election day: 2026-11-03
+- Contest: Governor
 
 Goal: through the series of steps below, produce a bulleted tree of candidates and sources for the given contest, instructions for how to vote, and job responsibilities. Do not make up any information. If not found, label the instructions as "not found".
 
@@ -24,8 +25,8 @@ Example of the bullet tree structure (using fictitious data):
     - source: https://github.com/henrybestermont
 ```
 
-The actual contest I am researching: Park District Commissioner
-Use this root exactly: - Contest: Park District Commissioner
+The actual contest I am researching: Governor
+Use this root exactly: - Contest: Governor
 
 Steps:
 1. Identify the candidate names for this contest using the election, contest, ballot style, and election day context above. Use authoritative election sources such as the official sample ballot or election office candidate list before using campaign sites. Do not guess or use candidates from a different contest, district, party ballot, or election date. If you cannot verify the candidate list, omit the names.
@@ -63,7 +64,7 @@ When I send Ready for paste-back, your entire reply must be exactly one fenced m
 
 Example structure (inside your paste-back fenced markdown block):
 ```markdown
-- Contest: Park District Commissioner
+- Contest: Governor
   - Candidate: Example Name
     - source: https://example.org/source
 ```

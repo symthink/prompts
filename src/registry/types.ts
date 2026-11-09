@@ -1,5 +1,11 @@
 export type PromptDelivery = 'external-chat' | 'symthink-api';
 
+/** How the consuming app expects to interpret the model reply (or decision payload). */
+export type PromptOutputFormat = 'paste-back-markdown' | 'json' | 'text' | 'decision';
+
+/** Model or tool capabilities the prompt needs (extensible enum). */
+export type PromptCapability = 'web_search';
+
 export type UsageStatus = 'active' | 'mirrored' | 'experimental' | 'deprecated' | 'reference';
 
 export interface PromptVariableMeta {
@@ -17,9 +23,6 @@ export interface PromptUsage {
     wired: boolean;
     /** Where Symthink uses the prompt today: UI entry points, API routes, or jobs. */
     surfaces: string[];
-    /** Symthink files the prompt text came from or is assembled in. */
-    sourceFiles: string[];
-    docs?: string;
   };
   /** True when the AI's reply is pasted back into a Symthink tree. */
   pasteBack: boolean;
@@ -32,7 +35,12 @@ export interface PromptMeta {
   title: string;
   description: string;
   delivery: PromptDelivery;
-  output: 'single' | 'system_user';
+  output: 'single' | 'system_user' | 'decision';
+  outputFormat: PromptOutputFormat;
+  /** Tooling the model needs; empty when the prompt is self-contained. */
+  requires: PromptCapability[];
+  /** True when this package exports a Zod output schema for `outputFormat: "json"`. */
+  outputSchema?: boolean;
   variables: PromptVariableMeta[];
   usage: PromptUsage;
 }

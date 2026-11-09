@@ -124,20 +124,14 @@ Briefly identify the 2–3 factors that most influenced the overall score.
 
 Do not write the article yet.
 
-type: question
-label: Transit funding
-text: How should Springfield fund expanded bus service?
+type: Question
+label: Question
+text: Should the town adopt a stormwater fee❓
 support:
-  - type: idea
-    label: Sales tax
-    text: Add a quarter-cent sales tax dedicated to transit.
-    editorial_note: Needs revenue estimates.
+  - type: Idea
+    label: Benefit
+    text: Dedicated funding for drainage upgrades💡
     support:
-      - type: claim
-        label: Revenue
-        text: A quarter-cent tax would raise about $9 million a year.
-        sources:
-          - https://example.org/budget-office/transit-revenue-estimate
-  - type: idea
-    label: Fare changes
-    text: Raise fares during peak hours only.
+      - type: Claim
+        label: Evidence
+        text: Nearby towns reduced flood claims after similar fees🕫

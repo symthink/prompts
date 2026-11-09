@@ -36,8 +36,6 @@ Prompt 2 of evidence-aware article drafting, sent in the same chat after the edi
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/prompts/articleDraft.ts`, `symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/evidence-aware-article-drafting.md`
 - **Notes:** Context-free: relies on the tree and analysis from Prompt 1 earlier in the same conversation.
 
 _No variables — the prompt is static._
@@ -51,9 +49,7 @@ Prompt 1 of evidence-aware article drafting: an editorial analyst assesses a YAM
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/src/prompts/articleEditorialAnalysis.ts`, `symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt, serializeArticleBranch)`
-- **Symthink docs:** `symthink-io/docs/developer-guide/systems/evidence-aware-article-drafting.md`
-- **Notes:** symthink-io caps the assembled prompt at 40,000 characters and the branch at 15 levels before rendering.
+- **Notes:** Consumers typically cap the assembled prompt at 40,000 characters and the branch at 15 levels before rendering.
 
 | Variable | Type | Required | Description |
 |----------|------|----------|-------------|

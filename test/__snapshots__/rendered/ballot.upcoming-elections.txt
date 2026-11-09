@@ -1,20 +1,17 @@
 Use web search to identify the next upcoming elections for a voter in this U.S. jurisdiction.
 
-Today's date: Saturday, October 24, 2026 (2026-10-24). Only include elections strictly AFTER this date.
+Today's date: Wednesday, June 17, 2026 (2026-06-17). Only include elections strictly AFTER this date.
 
 Voter jurisdiction context (public geographic data only — do NOT search for or request street address, voter name, date of birth, precinct ID, or ballot-style ID):
-Location: Springfield, IL 62701
+Location: Anadarko, Caddo County, OK, ZIP 73005
 Districts:
-- Congressional district: Illinois's 13th congressional district
-- County: Sangamon County
-
+- congressional_district: Congressional District 3
 Upcoming elections from Google Civic (context only — official sample ballots remain the source of truth):
-- Illinois Midterm General Election (2026-11-03)
-- Springfield Municipal Election
+- Oklahoma Midterm General Election (2026-11-03)
 
 Task:
-- Return the next 3 chronologically upcoming election events for this jurisdiction that are AFTER 2026-10-24. Each distinct party-primary event counts toward this limit (e.g. separate Democratic and Republican primaries each count as one event).
-- EXCLUDE any election on or before 2026-10-24, including elections that happened yesterday.
+- Return the next 3 chronologically upcoming election events for this jurisdiction that are AFTER 2026-06-17. Each distinct party-primary event counts toward this limit (e.g. separate Democratic and Republican primaries each count as one event).
+- EXCLUDE any election on or before 2026-06-17, including elections that happened yesterday.
 - Provide the specific election name and calendar date when supported by official or reliable election-office sources.
 - Do NOT fabricate specific election names or calendar dates.
 - When no specific date is available, set electionDay to null, datePrecision to "month", and put the month/year in scheduledLabel (e.g. "June 2026").
@@ -33,7 +30,7 @@ Election naming and cycle rules (important):
 - For November general elections in presidential years (e.g. 2028), use kind "presidential" and include "Presidential" in the name.
 - Use kind "general" only for non-November general elections or other general elections that are not federal midterm/presidential cycles.
 - Use kind "primary" for party primary elections; use kind "local" for municipal/school/board elections; use kind "special" for special elections.
-- Include Illinois in the name when the election is statewide for that voter's state.
+- Include the voter's state in the name when the election is statewide for that voter's state.
 - Do NOT prefix election names with the calendar year when electionDay is set—the date appears separately in electionDay and scheduledLabel.
 Party primary naming (important):
 - When an official source describes a party-specific primary or party ballot, the name MUST include the party using the source's wording (e.g. "Democratic", "Republican", "Libertarian", "Nonpartisan").

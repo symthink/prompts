@@ -1,15 +1,58 @@
 import { bundle } from '../generated/symthink-api.js';
 import { createRenderer } from '../render/engine.js';
-import { sourceDiscovery, type SourceDiscoveryVars } from '../schemas/ballot/source-discovery.js';
-import { upcomingElections, type UpcomingElectionsVars } from '../schemas/ballot/upcoming-elections.js';
-import { orientationRepair, type OrientationRepairVars } from '../schemas/civic-areas/orientation-repair.js';
-import { orientation, type OrientationVars } from '../schemas/civic-areas/orientation.js';
-import { synthesis, type SynthesisVars } from '../schemas/civic-listening/synthesis.js';
-import { labels, type LabelsVars } from '../schemas/in-app/labels.js';
-import { pdfCitation, type PdfCitationVars } from '../schemas/in-app/pdf-citation.js';
-import { rephraseOptions, type RephraseOptionsVars } from '../schemas/in-app/rephrase-options.js';
+import {
+  ballotSourceOutputSchema,
+  sourceDiscovery,
+  sourceDiscoveryOutputSchema,
+  type BallotSourceOutput,
+  type SourceDiscoveryOutput,
+  type SourceDiscoveryVars,
+} from '../schemas/ballot/source-discovery.js';
+import {
+  upcomingElections,
+  upcomingElectionsOutputSchema,
+  type UpcomingElectionModelRow,
+  type UpcomingElectionsOutput,
+  type UpcomingElectionsVars,
+} from '../schemas/ballot/upcoming-elections.js';
+import {
+  orientationRepair,
+  orientationRepairOutputSchema,
+  type OrientationRepairOutput,
+  type OrientationRepairVars,
+} from '../schemas/civic-areas/orientation-repair.js';
+import {
+  orientation,
+  orientationOutputSchema,
+  type OrientationOutput,
+  type OrientationVars,
+} from '../schemas/civic-areas/orientation.js';
+import {
+  synthesis,
+  synthesisOutputSchema,
+  type SynthesisOutput,
+  type SynthesisVars,
+} from '../schemas/civic-listening/synthesis.js';
+import { labels, labelsOutputSchema, type LabelsOutput, type LabelsVars } from '../schemas/in-app/labels.js';
+import {
+  pdfCitation,
+  pdfCitationOutputSchema,
+  type PdfCitationOutput,
+  type PdfCitationVars,
+} from '../schemas/in-app/pdf-citation.js';
+import {
+  rephraseOptions,
+  rephraseOptionsOutputSchema,
+  type RephraseOptionsOutput,
+  type RephraseOptionsVars,
+} from '../schemas/in-app/rephrase-options.js';
 import { rephrase, type RephraseVars } from '../schemas/in-app/rephrase.js';
-import { singleLabel, type SingleLabelVars } from '../schemas/in-app/single-label.js';
+import {
+  singleLabel,
+  singleLabelOutputSchema,
+  type SingleLabelOutput,
+  type SingleLabelVars,
+} from '../schemas/in-app/single-label.js';
 import { warSummary, type WarSummaryVars } from '../schemas/in-app/war-summary.js';
 
 export const symthinkApiPrompts = {
@@ -56,17 +99,40 @@ export const renderSingleLabel = (vars: SingleLabelVars) => renderPrompt('in-app
 export const renderWarSummary = (vars: WarSummaryVars) => renderPrompt('in-app.war-summary', vars);
 
 export type {
+  BallotSourceOutput,
+  LabelsOutput,
   LabelsVars,
+  OrientationOutput,
+  OrientationRepairOutput,
   OrientationRepairVars,
   OrientationVars,
+  PdfCitationOutput,
   PdfCitationVars,
+  RephraseOptionsOutput,
   RephraseOptionsVars,
   RephraseVars,
+  SingleLabelOutput,
   SingleLabelVars,
+  SourceDiscoveryOutput,
   SourceDiscoveryVars,
+  SynthesisOutput,
   SynthesisVars,
+  UpcomingElectionModelRow,
+  UpcomingElectionsOutput,
   UpcomingElectionsVars,
   WarSummaryVars,
+};
+export {
+  ballotSourceOutputSchema,
+  labelsOutputSchema,
+  orientationOutputSchema,
+  orientationRepairOutputSchema,
+  pdfCitationOutputSchema,
+  rephraseOptionsOutputSchema,
+  singleLabelOutputSchema,
+  sourceDiscoveryOutputSchema,
+  synthesisOutputSchema,
+  upcomingElectionsOutputSchema,
 };
 export { PromptVariablesError, UnknownPromptError, type PromptVariableIssue } from '../render/errors.js';
 export type { SystemUserPrompt } from '../render/define.js';

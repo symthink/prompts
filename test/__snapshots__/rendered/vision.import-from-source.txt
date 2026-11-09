@@ -4,7 +4,7 @@ You are helping me extract and convert a compelling argument or idea from an ext
 - Find and extract the most compelling argument or idea in the source text and express it as a Symthink reasoning tree.
 - The root should be the key insight.  Break down all supporting reasoning and evidence into a heirarchy below that key insight.
 
-Article URL (read or browse this): https://example.org/articles/protected-bike-lanes-and-street-safety
+Article URL (read or browse this): https://example.gov/minutes/2026-04-01
 
 PASTE-BACK CONTRACT (read first)
 

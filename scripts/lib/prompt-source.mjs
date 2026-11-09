@@ -9,10 +9,13 @@ export const PARTIALS_DIR = path.join(PROMPTS_DIR, '_partials');
 export const GENERATED_DIR = path.join(ROOT, 'src', 'generated');
 
 export const DELIVERIES = ['external-chat', 'symthink-api'];
-export const OUTPUTS = { single: ['prompt'], system_user: ['system', 'user'] };
+export const OUTPUTS = { single: ['prompt'], system_user: ['system', 'user'], decision: ['state'] };
+const DECISION_QUESTION_TYPES = ['boolean', 'choice', 'score', 'box'];
 export const USAGE_STATUSES = ['active', 'mirrored', 'experimental', 'deprecated', 'reference'];
 
 const PARTIAL_REF = /\{\{>\s*([\w-]+)\s*\}\}/g;
+const OUTPUT_FORMATS = ['paste-back-markdown', 'json', 'text', 'decision'];
+const PROMPT_CAPABILITIES = ['web_search'];
 
 async function listDirs(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -44,8 +47,45 @@ function assertMeta(meta, expectedId, metaPath) {
   if (!USAGE_STATUSES.includes(meta.usage?.status)) {
     problems.push(`usage.status must be one of ${USAGE_STATUSES.join(', ')}`);
   }
+  if (!OUTPUT_FORMATS.includes(meta.outputFormat)) {
+    problems.push(`outputFormat must be one of ${OUTPUT_FORMATS.join(', ')}`);
+  }
+  if (meta.output === 'decision' && meta.outputFormat !== 'decision') {
+    problems.push('decision prompts must set outputFormat to "decision"');
+  }
+  if (meta.output !== 'decision' && meta.outputFormat === 'decision') {
+    problems.push('outputFormat "decision" is only valid when output is "decision"');
+  }
+  if (!Array.isArray(meta.requires)) {
+    problems.push('requires must be an array');
+  } else if (!meta.requires.every((item) => PROMPT_CAPABILITIES.includes(item))) {
+    problems.push(`requires entries must be one of ${PROMPT_CAPABILITIES.join(', ')}`);
+  }
   if (problems.length) {
     throw new Error(`${path.relative(ROOT, metaPath)}: ${problems.join('; ')}`);
+  }
+}
+
+function assertDecisionQuestions(questions, dir) {
+  if (!questions || typeof questions !== 'object' || Array.isArray(questions)) {
+    throw new Error(`${path.relative(ROOT, dir)}: questions.json must be a non-array object`);
+  }
+  for (const [key, question] of Object.entries(questions)) {
+    if (!key) throw new Error(`${path.relative(ROOT, dir)}: questions.json has an empty key`);
+    if (!question || typeof question !== 'object' || Array.isArray(question)) {
+      throw new Error(`${path.relative(ROOT, dir)}: questions.${key} must be an object`);
+    }
+    if (!DECISION_QUESTION_TYPES.includes(question.type)) {
+      throw new Error(
+        `${path.relative(ROOT, dir)}: questions.${key}.type must be one of ${DECISION_QUESTION_TYPES.join(', ')}`,
+      );
+    }
+    if (typeof question.instructions !== 'string') {
+      throw new Error(`${path.relative(ROOT, dir)}: questions.${key}.instructions must be a string`);
+    }
+    if (question.choices != null && !Array.isArray(question.choices)) {
+      throw new Error(`${path.relative(ROOT, dir)}: questions.${key}.choices must be an array when present`);
+    }
   }
 }
 
@@ -63,12 +103,28 @@ export async function loadPrompts() {
       assertMeta(meta, `${domain}.${slug}`, metaPath);
 
       const templates = {};
-      for (const part of OUTPUTS[meta.output]) {
-        const file = path.join(dir, `${part}.md`);
-        if (!existsSync(file)) {
-          throw new Error(`${path.relative(ROOT, dir)} (output "${meta.output}") is missing ${part}.md`);
+      if (meta.output === 'decision') {
+        for (const part of OUTPUTS.decision) {
+          const file = path.join(dir, `${part}.md`);
+          if (!existsSync(file)) {
+            throw new Error(`${path.relative(ROOT, dir)} (output "decision") is missing ${part}.md`);
+          }
+          templates[part] = await readFile(file, 'utf8');
         }
-        templates[part] = await readFile(file, 'utf8');
+        const questionsPath = path.join(dir, 'questions.json');
+        if (!existsSync(questionsPath)) {
+          throw new Error(`${path.relative(ROOT, dir)} (output "decision") is missing questions.json`);
+        }
+        templates.questions = JSON.parse(await readFile(questionsPath, 'utf8'));
+        assertDecisionQuestions(templates.questions, dir);
+      } else {
+        for (const part of OUTPUTS[meta.output]) {
+          const file = path.join(dir, `${part}.md`);
+          if (!existsSync(file)) {
+            throw new Error(`${path.relative(ROOT, dir)} (output "${meta.output}") is missing ${part}.md`);
+          }
+          templates[part] = await readFile(file, 'utf8');
+        }
       }
       prompts.push({ domain, slug, dir, meta: { ...meta, domain }, templates });
     }

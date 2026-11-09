@@ -1,11 +1,9 @@
 I'm exploring civic opportunities and challenges at a specific level of government in my community.
 
 Jurisdiction context:
-- Level: SLD Upper Chamber
-- Semantic type: sld_upper
-- Resolved place name: State Senate District 12
-- District number: 12
-- State code: IL
+- Level: State
+- Semantic type: state
+- Jurisdiction: Data for this civic level is not available in my Symthink civic ladder. Do not invent place names.
 
 Conversation workflow:
 
@@ -30,7 +28,7 @@ Under the root only, add 3–7 child Questions (each line ends with ❓). No Ide
 - Do not invent URLs; omit "- source:" lines unless I explicitly asked for citations on questions.
 
 Current Question text:
-SLD Upper Chamber: What opportunities and challenges can be addressed in our district
+State: Maryland?
 
 PASTE-BACK CONTRACT (read first)
 
@@ -80,6 +78,6 @@ Example when multiple topics were requested (climate + education):
   - School preparedness: How are schools preparing for extreme heat and flood disruption❓
 ```
 
-Use this root exactly: - SLD Upper Chamber: What opportunities and challenges can be addressed in our district❓
+Use this root exactly: - State: Maryland?❓
 
 Reminder: Ready for paste-back → one fenced markdown code block only; no prose outside the fence.

@@ -4,20 +4,39 @@
   "description": "Finds the official text of a ballot measure, public arguments for and against, a steelman of each side, and the key value trade-off.",
   "delivery": "external-chat",
   "output": "single",
+  "outputFormat": "paste-back-markdown",
+  "requires": [
+    "web_search"
+  ],
   "variables": [
-    { "name": "electionName", "type": "string", "required": true, "description": "Election display text." },
-    { "name": "electionDay", "type": "string", "required": false, "description": "Election date, ISO `YYYY-MM-DD` preferred." },
-    { "name": "questionTitle", "type": "string", "required": true, "description": "Ballot question title without the `Question:` prefix or type markers." }
+    {
+      "name": "electionName",
+      "type": "string",
+      "required": true,
+      "description": "Election display text."
+    },
+    {
+      "name": "electionDay",
+      "type": "string",
+      "required": false,
+      "description": "Election date, ISO `YYYY-MM-DD` preferred."
+    },
+    {
+      "name": "questionTitle",
+      "type": "string",
+      "required": true,
+      "description": "Ballot question title without the `Question:` prefix or type markers."
+    }
   ],
   "usage": {
     "status": "mirrored",
     "symthink": {
       "wired": false,
-      "surfaces": ["My Vision → Ballot Research → Ballot question → Options (`ballot_question_research`)"],
-      "sourceFiles": ["symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotQuestionResearchPrompt)"],
-      "docs": "symthink-io/docs/developer-guide/systems/ballot-research.md"
+      "surfaces": [
+        "My Vision → Ballot Research → Ballot question → Options (`ballot_question_research`)"
+      ]
     },
     "pasteBack": true,
-    "notes": "The symthink-io source nests the street-safety example fence inside the root-line example fence. This template keeps both examples as two separate fenced blocks."
+    "notes": "The street-safety and root-line examples are separate fenced blocks rather than one nested inside the other."
   }
 }

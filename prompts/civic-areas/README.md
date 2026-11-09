@@ -37,7 +37,6 @@ Web-search prompt that explains one civic scope on the user's Civic Ladder (what
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/services/civic-area-orientation/prompt.ts (buildCivicAreaOrientationPrompt, PROMPT_VERSION civic-area-orientation-v3)`
 - **Notes:** Sent to the OpenAI Responses API with web search. Variable names mirror the snake_case CivicAreaOrientationContext schema so the API context can be passed through unchanged.
 
 | Variable | Type | Required | Description |
@@ -64,7 +63,6 @@ Follow-up message sent when the orientation response was not valid JSON for the 
 - **Output:** `single` (returns one string)
 - **Paste-back into Symthink:** no
 - **Wired in Symthink from this package:** not yet
-- **Symthink source:** `symthink-io/supabase/functions/_shared/services/civic-area-orientation/prompt.ts (buildCivicAreaOrientationRepairPrompt)`
 
 _No variables — the prompt is static._
 

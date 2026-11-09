@@ -8,9 +8,9 @@ Every prompt is a readable `.md` file. Variables are filled in with
 rendering, and returned as plain text with no HTML escaping. You can read the prompts on GitHub,
 try them in the local demo, or import them from npm.
 
-**Wiring symthink-io?** See [Integrating in the Symthink app](#integrating-in-the-symthink-app) for
-entrypoints, every `render…` helper, variable types, and how to map legacy `sourceFiles` to prompt
-ids. That section is written for AI assistants working in the main app repo.
+**Wiring a Symthink consumer?** See [Integrating in the Symthink app](#integrating-in-the-symthink-app)
+for entrypoints, every `render…` helper, variable types, version pinning, and a verification
+checklist. That section is written for humans and for AI assistants in the main app repo.
 
 ## What's inside
 
@@ -50,7 +50,7 @@ never bundles the server prompts, and the server never bundles the copy-paste pr
 # once per machine or project (symthink-io already has this in .npmrc)
 echo '@symthink:registry=https://npm.pkg.github.com' >> .npmrc
 
-npm install @symthink/prompts
+npm install @symthink/prompts@0.2.0
 ```
 
 Authenticate with a GitHub token that has `read:packages` (for example `export NODE_AUTH_TOKEN="$(gh auth token)"` before `npm install`).
@@ -78,10 +78,16 @@ const { system, user } = renderCivicListeningSynthesis({
 });
 ```
 
+**Decision prompts** (experimental) render `{ state, questions }` for TypeSafe Jev /
+`experimental_decide`. They use `output: "decision"` and `delivery: "symthink-api"` only. Types
+(`DecisionPrompt`, `DecisionQuestion`, …) are exported from `@symthink/prompts/registry`; see
+[CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-decision-prompt). No production decision prompts ship
+in this package yet—a test-only example lives under `test/decision-prompt-example/`.
+
 In Deno, use an `npm:` specifier:
 
 ```ts
-import { renderPdfCitation } from 'npm:@symthink/prompts@0.1/symthink-api';
+import { renderPdfCitation } from 'npm:@symthink/prompts@0.2.0/symthink-api';
 ```
 
 You can also render by id, or validate variables before rendering:
@@ -132,11 +138,12 @@ Each call site that today builds prompt text locally should:
 Do **not** copy template markdown into symthink-io. The product should depend on a released
 `@symthink/prompts` version so prompt wording updates ride semver.
 
-### Find the prompt for a legacy call site
+### Pick a prompt id
 
-Use the [Provenance](#provenance) table: each row links a prompt id to symthink-io `sourceFiles`
-(functions and modules that used to own the text). You can also search symthink-io for a distinctive
-phrase from the old prompt, then match that file to a row in the table.
+Match the product surface (UI path, API route, or job) to a prompt using `usage.symthink.surfaces` in
+domain READMEs or registry metadata. If you are replacing duplicated in-repo prompt strings, compare
+rendered output from this package to the legacy text for the same variables (see [Verify before
+merging](#verify-before-merging)).
 
 At runtime or in tooling, load metadata without rendering:
 
@@ -145,11 +152,13 @@ import { getPromptMeta, listPrompts } from '@symthink/prompts/registry';
 
 const meta = getPromptMeta('ballot.candidate-research');
 // meta.delivery → 'external-chat' | 'symthink-api'
-// meta.output → 'single' | 'system_user'
+// meta.output → 'single' | 'system_user' | 'decision'
+// meta.outputFormat → 'paste-back-markdown' | 'json' | 'text' | 'decision'
+// meta.requires → e.g. [] or ['web_search']
+// meta.outputSchema → true when a Zod reply schema is exported (JSON prompts only)
 // meta.variables → { name, type, required, description }[]
-// meta.usage.symthink.sourceFiles → legacy symthink-io paths
 // meta.usage.symthink.surfaces → product entry points (routes, UI, jobs)
-// meta.usage.symthink.wired → false until symthink-io uses this package for that id
+// meta.usage.symthink.wired → false until the app renders this id from the package
 ```
 
 Prefer migrating prompts where `usage.status` is `mirrored` (canonical text lives here; symthink-io
@@ -158,10 +167,10 @@ still has a copy). Skip `reference` prompts unless you are deliberately adopting
 
 ### Pick the import path
 
-| `meta.delivery` | Import from | Typical symthink-io location |
-|-----------------|-------------|------------------------------|
-| `external-chat` | `@symthink/prompts/external-chat` | Vite app (`src/`), client-side research flows |
-| `symthink-api` | `@symthink/prompts/symthink-api` | Supabase edge functions, Deno `npm:` imports |
+| `meta.delivery` | Import from | Typical consumer |
+|-----------------|-------------|------------------|
+| `external-chat` | `@symthink/prompts/external-chat` | Browser or mobile client (copy-paste / research flows) |
+| `symthink-api` | `@symthink/prompts/symthink-api` | Server or edge worker (Deno `npm:` imports) |
 
 Never import `symthink-api` prompts from the browser bundle (they are server prompts). The two
 entrypoints are separate builds so tree-shaking keeps copy-paste prompts out of the server bundle
@@ -220,10 +229,14 @@ For `system_user` prompts, the return type is `SystemUserPrompt` (`{ system: str
 Wire `system` and `user` into your existing chat/completions helper the same way you already split
 static system instructions from the dynamic user payload.
 
-### Refactor pattern (symthink-io)
+### Refactor pattern
+
+Pin an exact package version in `package.json` (no semver range on `@symthink/prompts`) and in Deno
+import maps (`npm:@symthink/prompts@X.Y.Z/<entrypoint>`). Bump the pin only when you intend prompt
+wording to change in production.
 
 ```ts
-// Before: local string assembly in symthink-io
+// Before: local string assembly in the app
 // export function buildBallotCandidateResearchPrompt(ctx) { return `...${ctx.name}...`; }
 
 import {
@@ -243,10 +256,10 @@ export function buildBallotCandidateResearchPrompt(ctx: …): string {
 }
 ```
 
-Keep context-gathering, truncation, and API calls in symthink-io. Move only the **wording** and
+Keep context-gathering, truncation, and API calls in the consumer app. Move only the **wording** and
 Mustache structure into this package. If the old builder applied extra formatting (JSON.stringify,
 bullet lists, etc.), check whether the Zod schema's optional `view()` in this repo already encodes
-that—duplicate formatting in symthink-io can double-encode or drift from snapshots.
+that—duplicate formatting at the call site can double-encode or drift from snapshots.
 
 Optional sections in templates use Mustache (`{{#field}}…{{/field}}`). Lists expose derived flags
 such as `hasChildLines` and string equality flags such as `nodeTypeIs.question`; you do not pass
@@ -262,8 +275,8 @@ those—they are computed at render time from the variables you supply.
    diff). Normalization rules are fixed—see [Rendering rules](#rendering-rules).
 4. **Bundle**: Ensure client code only imports `@symthink/prompts/external-chat`.
 
-After symthink-io ships, update this repo's `meta.json` for that prompt (`usage.symthink.wired:
-true`, `usage.status: active`) in a follow-up change here—not in the app repo.
+After the app ships wiring for a prompt, update this repo's `meta.json` (`usage.symthink.wired:
+true`, `usage.status: active`) in a follow-up change here—not in the consumer repo.
 
 ### Registry
 
@@ -275,11 +288,23 @@ import { getPromptMeta, listDomains, listPrompts, promptRegistry } from '@symthi
 listPrompts({ delivery: 'symthink-api', domain: 'in-app' });
 listDomains();
 promptRegistry.length; // same metadata as getPromptMeta for every id
-getPromptMeta('ballot.source-discovery')?.usage.symthink.sourceFiles;
+getPromptMeta('ballot.source-discovery')?.usage.symthink.surfaces;
 ```
 
 `@symthink/prompts/registry` has no render functions and no Mustache dependency weight from the
 template bundles—safe for tooling, codegen, or admin UI that lists prompts.
+
+### JSON output schemas
+
+Prompts with `outputFormat: "json"` and `outputSchema: true` export Zod schemas for the model
+reply alongside their variable schemas. Import them from `@symthink/prompts/symthink-api` (for
+example `labelsOutputSchema`, `orientationOutputSchema`, and matching `…Output` types). Sample
+replies live in `fixtures/<prompt-id>.output.json` for tests.
+
+These schemas mirror what the Symthink app accepts today—they are documented here for future
+`runPrompt()` work; symthink-io does not import them yet. This package uses **Zod 4**; edge
+functions that still use Zod 3 should import output validators from this package rather than
+mixing Zod instances.
 
 ### Rendering rules
 
@@ -325,7 +350,7 @@ tests.
 | `npm run test:update` | Accept intended changes to rendered snapshots |
 | `npm run typecheck` | Type-check the library, tests, and demo |
 | `npm run build` | Build `dist/` (ESM, CommonJS, and type declarations) |
-| `npm run docs:domain-index` | Regenerate the prompt tables in the domain READMEs and the provenance table below |
+| `npm run docs:domain-index` | Regenerate the prompt tables in the domain READMEs |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for template conventions and how to add a prompt.
 For AI assistants and Cursor agents **editing this repository**, see [AGENTS.md](AGENTS.md).
@@ -341,39 +366,6 @@ Packages are published to GitHub Packages (`npm.pkg.github.com`), not the public
 4. Later releases: `npm run release` (uses [release-it](https://github.com/release-it/release-it) to bump semver, tag `v*`, create a GitHub release, and publish).
 
 Follow [AGENTS.md](AGENTS.md) for semver: prompt wording changes are **minor**; breaking variable contracts are **major**.
-
-## Provenance
-
-Every prompt was copied from the Symthink app. The `sourceFiles` paths below point into the
-symthink-io repository.
-
-<!-- provenance:start (generated by `npm run docs:domain-index`; edit meta.json instead) -->
-
-| Prompt | Status | Copied from (symthink-io) |
-|--------|--------|---------------------------|
-| [`articles.draft`](prompts/articles/README.md#draft) | `mirrored` | `symthink-io/src/prompts/articleDraft.ts`<br>`symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt)` |
-| [`articles.editorial-analysis`](prompts/articles/README.md#editorial-analysis) | `mirrored` | `symthink-io/src/prompts/articleEditorialAnalysis.ts`<br>`symthink-io/src/utils/articlePrompt.builder.ts (generateArticlePrompt, serializeArticleBranch)` |
-| [`ballot.candidate-research`](prompts/ballot/README.md#candidate-research) | `mirrored` | `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotCandidateResearchPrompt)` |
-| [`ballot.candidate-roster`](prompts/ballot/README.md#candidate-roster) | `mirrored` | `symthink-io/src/utils/ballotCandidateRoster.helpers.ts (buildBallotCandidateRosterPrompt)` |
-| [`ballot.contest-research`](prompts/ballot/README.md#contest-research) | `mirrored` | `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotContestResearchPrompt)` |
-| [`ballot.question-research`](prompts/ballot/README.md#question-research) | `mirrored` | `symthink-io/src/utils/ballotAiResearchContext.helpers.ts (buildBallotQuestionResearchPrompt)` |
-| [`ballot.source-discovery`](prompts/ballot/README.md#source-discovery) | `mirrored` | `symthink-io/supabase/functions/_shared/services/ballot-source-discovery.ts (buildDiscoveryPrompt)`<br>`symthink-io/supabase/functions/_shared/services/ballot-civic-context.ts (formatCivicJurisdictionPromptBlock)`<br>`symthink-io/supabase/functions/_shared/services/ballot-civic.service.ts (formatCivicElectionsForPrompt)` |
-| [`ballot.upcoming-elections`](prompts/ballot/README.md#upcoming-elections) | `mirrored` | `symthink-io/supabase/functions/_shared/services/upcoming-elections-discovery.ts (buildUpcomingElectionsPrompt)` |
-| [`civic-areas.orientation`](prompts/civic-areas/README.md#orientation) | `mirrored` | `symthink-io/supabase/functions/_shared/services/civic-area-orientation/prompt.ts (buildCivicAreaOrientationPrompt, PROMPT_VERSION civic-area-orientation-v3)` |
-| [`civic-areas.orientation-repair`](prompts/civic-areas/README.md#orientation-repair) | `mirrored` | `symthink-io/supabase/functions/_shared/services/civic-area-orientation/prompt.ts (buildCivicAreaOrientationRepairPrompt)` |
-| [`civic-listening.synthesis`](prompts/civic-listening/README.md#synthesis) | `mirrored` | `symthink-io/supabase/functions/_shared/civic-listening/synthesis-prompts.ts (buildPrompt)`<br>`symthink-io/supabase/functions/_shared/civic-listening/run-synthesis.ts` |
-| [`in-app.labels`](prompts/in-app/README.md#labels) | `mirrored` | `symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (MULTI_LABEL_SYSTEM_PROMPT, makeLabelsInline)` |
-| [`in-app.pdf-citation`](prompts/in-app/README.md#pdf-citation) | `mirrored` | `symthink-io/supabase/functions/_shared/ai/capabilities/pdf-citation.ts (PDF_CITATION_SYSTEM_PROMPT)`<br>`symthink-io/supabase/functions/_shared/pdf-citation-resolver.ts` |
-| [`in-app.rephrase`](prompts/in-app/README.md#rephrase) | `reference` | `symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (REPHRASE_TEXT_SYSTEM_PROMPT, getRephrasing)` |
-| [`in-app.rephrase-options`](prompts/in-app/README.md#rephrase-options) | `mirrored` | `symthink-io/supabase/functions/_shared/ai/capabilities/rephrase.ts (buildRephraseSystemPrompt, getRephraseOptions)` |
-| [`in-app.single-label`](prompts/in-app/README.md#single-label) | `reference` | `symthink-io/supabase/functions/_shared/ai/capabilities/labels.ts (SINGLE_LABEL_SYSTEM_PROMPT, getTextLabel)` |
-| [`in-app.war-summary`](prompts/in-app/README.md#war-summary) | `mirrored` | `symthink-io/supabase/functions/_shared/ai/prompts/war.ts (WAR_SYSTEM_PROMPT)`<br>`symthink-io/supabase/functions/_shared/ai/capabilities/war-summary.ts (generateWarSummary)` |
-| [`vision.civic-level-research`](prompts/vision/README.md#civic-level-research) | `mirrored` | `symthink-io/src/utils/civicLevelAiResearchContext.helpers.ts (buildCivicLevelResearchPrompt)` |
-| [`vision.import-from-source`](prompts/vision/README.md#import-from-source) | `mirrored` | `symthink-io/src/prompts/importFromArticle.ts`<br>`symthink-io/src/utils/importFromArticlePrompt.builder.ts`<br>`symthink-io/src/utils/pasteBackContract.helpers.ts` |
-| [`vision.learning-with-ai`](prompts/vision/README.md#learning-with-ai) | `mirrored` | `symthink-io/src/prompts/learningWithAi.ts`<br>`symthink-io/src/utils/learningWithAiPrompt.builder.ts` |
-| [`vision.research`](prompts/vision/README.md#research) | `mirrored` | `symthink-io/src/utils/ai.store.ts (buildResearchPrompt, assembleResearchPromptBody)`<br>`symthink-io/src/utils/pasteBackContract.helpers.ts` |
-
-<!-- provenance:end -->
 
 ## License
 

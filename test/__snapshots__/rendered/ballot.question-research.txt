@@ -1,14 +1,14 @@
 I'm researching my official election ballot and need source-backed help.
 
 Ballot context:
-- Election: Illinois Midterm General Election
+- Election: General Election 2026
 - Election day: 2026-11-03
-- Ballot question: Springfield Library Facilities Bond Question
+- Ballot question: Bond measure
 
 Goal: find the official text of this ballot question and a neutral account of what a vote each way does. Do not invent ballot language. If you cannot verify the official text from an authoritative source, say so and omit claims you cannot cite.
 
 Ballot question title from my imported ballot:
-Springfield Library Facilities Bond Question
+Bond measure
 
 Steps:
 1. Using the ballot context above, find the official measure that matches this title. Prefer the official sample ballot, election office, or enacted ordinance. Do not use a different election, district, or similarly named measure.
@@ -46,8 +46,7 @@ When I send Ready for paste-back, your entire reply must be exactly one fenced m
 
 Example structure (inside your paste-back fenced markdown block):
 ```markdown
-- Question: Springfield Library Facilities Bond Question❓
-```
+- Question: Bond measure❓
 
 Example structure (inside your paste-back fenced markdown block):
 ```markdown
@@ -58,6 +57,8 @@ Example structure (inside your paste-back fenced markdown block):
   - Improve intersections: Identify and address locations where pedestrians and cyclists face the greatest risks💡
     - Crash data: Review reported crashes to identify dangerous locations💡
     - Resident observations: Ask residents where they feel unsafe crossing streets💡
+```
+
 ```
 
 Reminder: Ready for paste-back → one fenced markdown code block only; no prose outside the fence.

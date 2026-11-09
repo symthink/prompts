@@ -34,7 +34,6 @@ Instructions: {{votingInstruction}}
 Choice: {{votingInstruction}}
 {{/votingInstruction}}
 {{/questions}}
-
 {{/elections}}
 {{#officialSourceUrl}}
 Official sample-ballot source: {{officialSourceUrl}}

@@ -10,3 +10,8 @@ export const singleLabel = definePrompt({
 });
 
 export type SingleLabelVars = PromptVars<typeof singleLabel>;
+
+/** Reference prompt — same JSON shape as legacy `getTextLabel`. */
+export const singleLabelOutputSchema = z.object({ label: z.string() }).passthrough();
+
+export type SingleLabelOutput = z.infer<typeof singleLabelOutputSchema>;

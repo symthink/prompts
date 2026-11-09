@@ -1,0 +1,6 @@
+{
+  "refunded": {
+    "type": "boolean",
+    "instructions": "Was a full refund issued to {{customerName}}?"
+  }
+}

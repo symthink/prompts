@@ -1,7 +1,76 @@
 import { z } from 'zod';
 
 import { definePrompt, type PromptVars } from '../../render/define.js';
-import { nonEmpty, optionalText } from '../shared.js';
+import { nonEmpty, optionalText, promptBlock, SYM_QUESTION } from '../shared.js';
+
+const QUESTION_STREET_EXAMPLE = `
+Example structure (inside your paste-back fenced markdown block):
+\`\`\`markdown
+- Street safety: How can we make our neighborhood safer for people walking and biking❓
+  - Reduce vehicle speeds: Slower traffic can reduce the risk and severity of collisions💡
+    - Traffic calming: Speed cushions, narrower lanes, and raised crossings encourage drivers to slow down🕫
+    - Measure speeding: Collect speed data to identify where speeding is most common💡
+  - Improve intersections: Identify and address locations where pedestrians and cyclists face the greatest risks💡
+    - Crash data: Review reported crashes to identify dangerous locations💡
+    - Resident observations: Ask residents where they feel unsafe crossing streets💡
+\`\`\`
+  `;
+
+function buildQuestionResearchBody(questionTitle: string): string {
+  return promptBlock(`
+    Goal: find the official text of this ballot question and a neutral account of what a vote each way does. Do not invent ballot language. If you cannot verify the official text from an authoritative source, say so and omit claims you cannot cite.
+
+    Ballot question title from my imported ballot:
+    ${questionTitle}
+
+    Steps: 
+    1. Using the ballot context above, find the official measure that matches this title. Prefer the official sample ballot, election office, or enacted ordinance. Do not use a different election, district, or similarly named measure. 
+    2. Provide the exact wording of the complete question and a source link to where you found it. 
+    3. Find public arguments on the web in favor and against the measure. You can use blogs, videos, social media, and other sites, but do not make up sources. 
+    4. Provide one steelman argument in favor and one against the measure. 
+    5. Identify the key value trade-off in making a decision.
+`);
+}
+
+function buildQuestionPasteBackTail(questionTitle: string): string {
+  const rootBulletBody = `Question: ${questionTitle}`;
+  return promptBlock(`
+PASTE-BACK CONTRACT (read first)
+
+Markup rules (strict):
+- Reply with ONLY one fenced markdown code block — nothing before or after it.
+- The block must use a complete fence pair: an opening line of three backticks followed by the word markdown, then your bulleted content, then a closing line of three backticks. Most AI chat apps show a Copy button on fenced blocks.
+- Do NOT use vendor document/canvas modes, :::writing blocks, attachments, or prose wrappers outside the fence.
+- Each tree-node bullet must use the form: - {short label}: {text} with an optional trailing type marker (Question=❓, Idea=💡, Claim=🕫).
+- Put the label and text on the same line after the colon. Do not put the description on a separate indented bullet under the label.
+- Multiple supporting points are sibling bullets at the same indent; each support has its own label: text line.
+- Labels max 30 chars; text max 280 chars.
+- Use 2-space indentation per nesting level.
+- Put URLs only as indented child bullets: - source: https://...
+
+I will import your final answer into Symthink using a paste-back step.
+
+Workflow:
+1. Discuss research normally until I am satisfied.
+2. I will send exactly: Ready for paste-back
+3. When you receive that message, switch to paste-back mode.
+
+Flow-specific rules:
+- Root bullet must be the current question below; nest all new points beneath it.
+
+Until I send Ready for paste-back, do NOT output paste-back markdown.
+
+When I send Ready for paste-back, your entire reply must be exactly one fenced markdown code block (opening fence line, bulleted tree, closing fence line). No other text before or after the fence.
+
+Example structure (inside your paste-back fenced markdown block):
+\`\`\`markdown
+- ${rootBulletBody}${SYM_QUESTION}
+  ${QUESTION_STREET_EXAMPLE}
+\`\`\`
+
+Reminder: Ready for paste-back → one fenced markdown code block only; no prose outside the fence.
+`);
+}
 
 export const questionResearch = definePrompt({
   id: 'ballot.question-research',
@@ -10,6 +79,10 @@ export const questionResearch = definePrompt({
     electionName: nonEmpty,
     electionDay: optionalText,
     questionTitle: nonEmpty,
+  }),
+  view: ({ questionTitle }) => ({
+    questionResearchBody: buildQuestionResearchBody(questionTitle),
+    questionPasteBackTail: buildQuestionPasteBackTail(questionTitle),
   }),
 });
 

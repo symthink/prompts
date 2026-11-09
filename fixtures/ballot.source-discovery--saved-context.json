@@ -1,15 +1,14 @@
 {
-  "location": "Springfield, IL 62701",
-  "districts": [
-    { "type": "County", "name": "Sangamon County" }
-  ],
-  "civicElections": [],
+  "location": "Anadarko, Caddo County, OK, ZIP 73005",
+  "districts": [{ "type": "congressional_district", "name": "Congressional District 3" }],
+  "civicElections": [{ "name": "Oklahoma Midterm General Election", "electionDay": "2026-11-03" }],
   "savedContext": {
-    "reuseScope": "county",
-    "key": "il-sangamon",
-    "precinct": "Capital 42",
-    "ballotStyle": "Style 14",
-    "sourceAgency": "Example County Clerk — Elections Division",
-    "sourceUrl": "https://elections.example.gov/sample-ballots"
+    "reuseScope": "limited_narrowing_context",
+    "key": "civic:zip:73005|areas:ok-caddo",
+    "precinct": "12",
+    "ballotStyle": "BS-DEM",
+    "partyContext": "Democratic",
+    "sourceAgency": "Example County Election Board",
+    "sourceUrl": "https://elections.example.gov/sample-ballot"
   }
 }

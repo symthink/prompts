@@ -1,6 +1,12 @@
 import Mustache from 'mustache';
 
 import type { PromptDefinition, PromptResult, PromptVars, SystemUserPrompt } from './define.js';
+import {
+  type DecisionPrompt,
+  type DecisionQuestion,
+  type DecisionQuestionsSpec,
+  decisionQuestionsSpecSchema,
+} from './decision-questions.js';
 import { PromptVariablesError, UnknownPromptError, type PromptVariableIssue } from './errors.js';
 import { normalizePrompt } from './normalize.js';
 
@@ -8,6 +14,9 @@ export interface PromptTemplates {
   prompt?: string;
   system?: string;
   user?: string;
+  state?: string;
+  /** Parsed from `questions.json` at bundle generation time. */
+  questions?: DecisionQuestionsSpec;
 }
 
 export interface TemplateBundle {
@@ -71,6 +80,26 @@ export function renderTemplate(
   return normalizePrompt(writer.render(template, view, partials, renderOptions));
 }
 
+function renderDecisionQuestions(
+  spec: DecisionQuestionsSpec,
+  view: Record<string, unknown>,
+  partials: Record<string, string>,
+): Record<string, DecisionQuestion> {
+  const parsed = decisionQuestionsSpecSchema.safeParse(spec);
+  if (!parsed.success) {
+    throw new Error(`Invalid decision questions spec: ${parsed.error.message}`);
+  }
+  return Object.fromEntries(
+    Object.entries(parsed.data).map(([key, question]) => [
+      key,
+      {
+        ...question,
+        instructions: renderTemplate(question.instructions, view, partials),
+      },
+    ]),
+  );
+}
+
 export function createRenderer<D extends PromptDefinitions>(definitions: D, bundle: TemplateBundle) {
   function getDefinition(id: string): PromptDefinition {
     const definition = definitions[id];
@@ -81,9 +110,11 @@ export function createRenderer<D extends PromptDefinitions>(definitions: D, bund
     return definition;
   }
 
-  function templatePart(id: string, part: keyof PromptTemplates): string {
+  type TextTemplatePart = Exclude<keyof PromptTemplates, 'questions'>;
+
+  function templatePart(id: string, part: TextTemplatePart): string {
     const template = bundle.templates[id]?.[part];
-    if (template == null) {
+    if (typeof template !== 'string' || template.length === 0) {
       throw new Error(`Prompt "${id}" is missing its ${part} template.`);
     }
     return template;
@@ -107,6 +138,18 @@ export function createRenderer<D extends PromptDefinitions>(definitions: D, bund
       const result: SystemUserPrompt = {
         system: renderTemplate(templatePart(id, 'system'), view, bundle.partials),
         user: renderTemplate(templatePart(id, 'user'), view, bundle.partials),
+      };
+      return result as PromptResult<D[Id]>;
+    }
+
+    if (definition.output === 'decision') {
+      const questions = bundle.templates[id]?.questions;
+      if (!questions) {
+        throw new Error(`Prompt "${id}" is missing its questions spec.`);
+      }
+      const result: DecisionPrompt = {
+        state: renderTemplate(templatePart(id, 'state'), view, bundle.partials),
+        questions: renderDecisionQuestions(questions, view, bundle.partials),
       };
       return result as PromptResult<D[Id]>;
     }

@@ -1,4 +1,4 @@
 {
   "audience": "subscriber",
-  "treeYaml": "type: question\nlabel: Library hours\ntext: Should branch libraries open on Sundays?\nsupport:\n  - type: claim\n    label: Demand\n    text: Weekend visits rose 18% after Saturday hours were extended.\n"
+  "treeYaml": "type: Question\nlabel: Question\ntext: Should the town adopt a stormwater fee❓\nsupport:\n  - type: Idea\n    label: Benefit\n    text: Dedicated funding for drainage upgrades💡\n    support:\n      - type: Claim\n        label: Evidence\n        text: Nearby towns reduced flood claims after similar fees🕫"
 }

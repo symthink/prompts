@@ -9,23 +9,22 @@ The resident already sees this scope on a Civic Ladder that lists parent and ove
 5. What are 3–6 concrete ways to get involved, with official entry points when you can verify them?
 
 CIVIC AREA (structured input — treat as authoritative identifiers; do not substitute a different place):
-boundary_group_id: bg_il_sldu_12
-name: Illinois State Senate District 12
-authoring_scope_key: sld_upper
+boundary_group_id: bg-mn-sld-19
+name: State Legislative Districts 19
+authoring_scope_key: state_legislative_district
 representation_topology: coterminous_legislative_district
-country: US
-state_or_equivalent: IL
-level_display: State Legislative District
+country: United States
+state_or_equivalent: MN
+level_display: State Legislative Districts — State Legislative Districts 19
 parent_areas:
-  - state: Illinois
-scope_identifiers: {"state_fips":"17","district":"012"}
+  - state: Minnesota
 ladder_members:
-  - sld_upper "State Senate District 12" (civic_area_id=ca_il_sldu_12) identifiers={"geoid":"17012"}
-  - sld_lower "State House District 23" (civic_area_id=ca_il_sldl_23)
+  - sld_upper "Senate District 19" (civic_area_id=sldu-2719) identifiers={"geoid":"sldu-2719"}
+  - sld_lower "House District 19" (civic_area_id=sldl-2719) identifiers={"geoid":"sldl-2719"}
 representation_channels:
-  - role=state_senator chamber=upper district_code=12 seats=1
-  - role=state_representative chamber=lower district_code=23 seats=1
-additional_context: The upper district contains two whole lower districts.
+  - role=upper chamber=upper district_code=19 seats=1
+  - role=lower chamber=lower district_code=19 seats=1
+  - role=sld_lower chamber=n/a district_code=n/a seats=1
 
 Topology-specific research instructions:
 This is one geographic state legislative district with distinct upper and lower representation channels. Upper and lower legislators and participation paths may differ; describe them separately where relevant. Do not merge this district with county or statewide executive powers.

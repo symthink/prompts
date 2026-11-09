@@ -6,16 +6,28 @@ prompt neutral, sourced, and honest about uncertainty.
 By submitting a contribution, you agree that it is licensed under the
 [Apache License 2.0](LICENSE), the same licence as the rest of the project.
 
+## Submitting a pull request
+
+Open a PR on GitHub; the [pull request template](.github/PULL_REQUEST_TEMPLATE.md) pre-fills a short
+checklist in plain language. You do not need to be a developer to suggest wording improvements.
+
+If your change touches ballot, civic listening, civic areas, or civic-level research prompts, read
+[NEUTRALITY.md](NEUTRALITY.md) first. Those paths have a stricter review bar; details are in that
+file, not repeated here.
+
 ## Layout of a prompt
 
 ```
 prompts/<domain>/<slug>/
-  meta.json      # id, title, description, delivery, output, variables, usage
+  meta.json      # id, title, delivery, output, outputFormat, requires, variables, usage
   prompt.md      # when output is "single"
   system.md      # when output is "system_user"
   user.md        #   (both files required)
+  state.md       # when output is "decision" (Mustache state for Jev)
+  questions.json # when output is "decision" (question specs; instructions may use Mustache)
 src/schemas/<domain>/<slug>.ts   # Zod schema for the variables, plus optional view values
 fixtures/<domain>.<slug>.json    # example variables for the demo and the snapshot tests
+fixtures/<domain>.<slug>.output.json   # fictional model reply when the prompt exports an output schema
 ```
 
 The id is always `<domain>.<slug>` and must match the folder names.
@@ -40,6 +52,22 @@ the wrong entrypoint, or if a domain README is out of date.
 
 New domain? Add `prompts/<domain>/README.md` (copy an existing one, keeping the
 `prompt-index` markers) and link it from the root README.
+
+## Adding a decision prompt
+
+Decision prompts render a `{ state, questions }` object for AI SDK `experimental_decide` (TypeSafe
+Jev via the Vercel AI Gateway). They are **server-only**: set `delivery` to `symthink-api` and
+`output` / `outputFormat` to `"decision"`. The package does not depend on the `ai` SDK; it only
+produces the payload.
+
+Use the same `definePrompt` helper with `output: 'decision'`. Templates are `state.md` plus
+`questions.json` (not under `prompts/` until you add a real prompt). Each question has `type`,
+`instructions`, and optional `choices`. Question `instructions` strings are rendered with Mustache
+like `state.md`; `type`, `choices`, and question keys are passed through unchanged. See
+`test/decision-prompt-example/` for a minimal worked example used only in tests.
+
+Register the definition in `src/symthink-api/index.ts` when the prompt is real. There is no
+`outputSchema` for decision prompts.
 
 ## Template conventions
 
@@ -86,11 +114,12 @@ changes; the domain README tables are generated from it.
 
 | Field | Meaning |
 |-------|---------|
+| `outputFormat` | How Symthink interprets the model reply: `paste-back-markdown`, `json`, `text`, or `decision` (Jev) |
+| `requires` | Capabilities the model needs (today: `web_search`; use `[]` when none) |
+| `outputSchema` | Set to `true` only when this package exports a Zod output schema for the reply (JSON prompts) |
 | `status` | `active`, `mirrored`, `experimental`, `deprecated`, or `reference` (below) |
 | `symthink.wired` | `true` once Symthink renders this prompt from this package |
 | `symthink.surfaces` | Where Symthink uses it: UI paths, API routes, or jobs |
-| `symthink.sourceFiles` | symthink-io files the text came from or is assembled in |
-| `symthink.docs` | Optional symthink-io doc describing the feature |
 | `pasteBack` | `true` when the AI's reply is imported back into a Symthink tree |
 | `notes` | Optional: known differences from the source, caveats, replacements |
 

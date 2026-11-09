@@ -26,16 +26,7 @@ The actual contest I am researching: {{contestTitle}}
 Use this root exactly: - Contest: {{contestTitle}}
 
 Steps:
-{{#hasContestCandidates}}
-1. Verified candidate names already listed under this contest in my imported ballot:
-{{#contestCandidates}}
-   - {{.}}
-{{/contestCandidates}}
-   Use these candidate names. Do not substitute, add, or guess other candidates for this contest unless an authoritative election source proves the imported ballot list is wrong for this exact election, party ballot, ballot style, and election date.
-{{/hasContestCandidates}}
-{{^hasContestCandidates}}
-1. Identify the candidate names for this contest using the election, contest, ballot style, and election day context above. Use authoritative election sources such as the official sample ballot or election office candidate list before using campaign sites. Do not guess or use candidates from a different contest, district, party ballot, or election date. If you cannot verify the candidate list, omit the names.
-{{/hasContestCandidates}}
+{{candidateVerificationStep}}
 2. For each verified candidate name, use their name and the ballot context info to identify website(s) with their issue positions.
 3. With the list of candidate websites found, identify the website with the highest probability of being an accurate and genuine representation of the candidate's positions. If you lack confidence in all results, omit the list of source urls. If there is more than one website with a high probability of being the candidate's official campaign website, then list them both.
 4. Work through steps 1–3 and 5 in conversation. Build the bulleted tree as you go, but do not output fenced markdown until I send Ready for paste-back.

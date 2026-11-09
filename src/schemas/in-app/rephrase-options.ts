@@ -15,3 +15,12 @@ export const rephraseOptions = definePrompt({
 });
 
 export type RephraseOptionsVars = PromptVars<typeof rephraseOptions>;
+
+/** Minimum shape from `getRephraseOptions` (app slices to three strings). */
+export const rephraseOptionsOutputSchema = z
+  .object({
+    options: z.array(z.string()).min(3),
+  })
+  .passthrough();
+
+export type RephraseOptionsOutput = z.infer<typeof rephraseOptionsOutputSchema>;

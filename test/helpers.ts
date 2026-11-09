@@ -23,7 +23,7 @@ export interface FixtureFile {
 
 export function loadFixtures(): FixtureFile[] {
   return readdirSync(FIXTURES_DIR)
-    .filter((file) => file.endsWith('.json'))
+    .filter((file) => file.endsWith('.json') && !file.endsWith('.output.json'))
     .sort()
     .map((file) => {
       const name = file.slice(0, -'.json'.length);

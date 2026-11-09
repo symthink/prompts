@@ -1,0 +1,20 @@
+{
+  "overview": "Repaired overview for a sample school district boundary.",
+  "responsibilities": "Operates elementary and middle schools within the district.",
+  "decision_makers": "An elected seven-member school board hires the superintendent.",
+  "resident_participation": "Parents and staff may speak during the public comment period.",
+  "get_involved": [
+    {
+      "title": "Join a district advisory committee",
+      "description": "Volunteer committees meet quarterly on facilities and curriculum.",
+      "url": null
+    }
+  ],
+  "sources": [
+    {
+      "title": "District annual report",
+      "url": "https://schools.example.k12.us/report",
+      "publisher": null
+    }
+  ]
+}

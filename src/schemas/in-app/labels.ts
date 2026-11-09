@@ -19,3 +19,19 @@ export const labels = definePrompt({
 });
 
 export type LabelsVars = PromptVars<typeof labels>;
+
+/** Shape accepted by `makeLabelsInline` after `JSON.parse`. */
+export const labelsOutputSchema = z
+  .object({
+    labels: z.array(
+      z
+        .object({
+          id: z.string(),
+          label: z.string(),
+        })
+        .passthrough(),
+    ),
+  })
+  .passthrough();
+
+export type LabelsOutput = z.infer<typeof labelsOutputSchema>;
