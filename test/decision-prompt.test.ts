@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
+import { decisionQuestionSchema } from '../src/render/decision-questions.js';
 import { PromptVariablesError } from '../src/render/errors.js';
 import { definePrompt } from '../src/render/define.js';
 import { createRenderer, renderTemplate } from '../src/render/engine.js';
@@ -47,7 +48,7 @@ describe('decision prompts (test-only example)', () => {
       ),
       questions: {
         refunded: {
-          type: 'boolean',
+          type: 'noul',
           instructions: 'Was a full refund issued to Alex?',
         },
       },
@@ -60,7 +61,7 @@ describe('decision prompts (test-only example)', () => {
     ).toThrow(PromptVariablesError);
   });
 
-  it('leaves choices and experimental question types intact', () => {
+  it('leaves criteria and question types intact through rendering', () => {
     const bundle = {
       templates: {
         'test.choice': {
@@ -69,7 +70,7 @@ describe('decision prompts (test-only example)', () => {
             severity: {
               type: 'choice' as const,
               instructions: 'Pick one.',
-              choices: ['low', 'high'],
+              criteria: { low: 'Low impact', high: 'High impact' },
             },
           },
         },
@@ -88,10 +89,29 @@ describe('decision prompts (test-only example)', () => {
         severity: {
           type: 'choice',
           instructions: 'Pick one.',
-          choices: ['low', 'high'],
+          criteria: { low: 'Low impact', high: 'High impact' },
         },
       },
     });
+  });
+});
+
+describe('decision question schema', () => {
+  it('rejects legacy boolean type', () => {
+    const parsed = decisionQuestionSchema.safeParse({
+      type: 'boolean',
+      instructions: 'Yes or no?',
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects score questions with more than ten criteria', () => {
+    const parsed = decisionQuestionSchema.safeParse({
+      type: 'score',
+      instructions: 'Rate it.',
+      criteria: Array.from({ length: 11 }, (_, index) => `level ${index}`),
+    });
+    expect(parsed.success).toBe(false);
   });
 });
 

@@ -9,7 +9,20 @@ export interface SystemUserPrompt {
   user: string;
 }
 
-export type { DecisionPrompt, DecisionQuestion, DecisionQuestionType, DecisionQuestionsSpec } from './decision-questions.js';
+export type {
+  ChoiceAnswer,
+  ChoiceQuestion,
+  DecisionAnswer,
+  DecisionPrompt,
+  DecisionQuestion,
+  DecisionQuestionType,
+  DecisionQuestionsSpec,
+  NoulAnswer,
+  NoulQuestion,
+  ScoreAnswer,
+  ScoreQuestion,
+  SystemOneResponse,
+} from './decision-questions.js';
 
 export interface PromptDefinition<
   S extends z.ZodType = z.ZodType,

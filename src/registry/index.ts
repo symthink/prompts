@@ -11,10 +11,18 @@ export type {
   UsageStatus,
 } from './types.js';
 export type {
+  ChoiceAnswer,
+  ChoiceQuestion,
+  DecisionAnswer,
   DecisionPrompt,
   DecisionQuestion,
   DecisionQuestionType,
   DecisionQuestionsSpec,
+  NoulAnswer,
+  NoulQuestion,
+  ScoreAnswer,
+  ScoreQuestion,
+  SystemOneResponse,
 } from '../render/decision-questions.js';
 export type { JsonPromptWithOutputSchema } from './output-schemas.js';
 export { outputSchemasByPromptId } from './output-schemas.js';

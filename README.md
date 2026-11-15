@@ -78,11 +78,36 @@ const { system, user } = renderCivicListeningSynthesis({
 });
 ```
 
-**Decision prompts** (experimental) render `{ state, questions }` for TypeSafe Jev /
-`experimental_decide`. They use `output: "decision"` and `delivery: "symthink-api"` only. Types
-(`DecisionPrompt`, `DecisionQuestion`, …) are exported from `@symthink/prompts/registry`; see
-[CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-decision-prompt). No production decision prompts ship
-in this package yet—a test-only example lives under `test/decision-prompt-example/`.
+**Decision prompts** render `{ state, questions }` for TypeSafe System One (`POST /v1/systemone`).
+They use `output: "decision"` and `delivery: "symthink-api"` only. Question types are TypeSafe-native
+`noul`, `score`, and `choice` (with `criteria`). Types (`DecisionPrompt`, `DecisionQuestion`, …) are
+exported from `@symthink/prompts/registry`; see [CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-decision-prompt).
+No production decision prompts ship in this package yet—a test-only example lives under
+`test/decision-prompt-example/`.
+
+**Jev helpers** (`@symthink/prompts/jev`) build TypeSafe System One requests for argument-quality
+features: certainty tagging (Sample 1), full Idea review (Samples 2–3) and review-unit fingerprints.
+
+```ts
+import {
+  buildCertaintyRequest,
+  buildReviewRequest,
+  fingerprintReviewUnit,
+  typeIntFromCertaintyScore,
+} from '@symthink/prompts/jev';
+
+const tagRequest = buildCertaintyRequest('Later bus service would probably reduce drunk driving downtown.');
+const typeInt = typeIntFromCertaintyScore(0.89); // 5
+
+const reviewRequest = buildReviewRequest(unit, { includeFallacies: true, includeSetFallacies: true });
+const fingerprint = fingerprintReviewUnit(unit);
+```
+
+`JEV_QUESTION_SET_VERSION` bumps whenever Jev question wording in `src/jev/` changes. The review
+question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`). To add a fallacy, append
+an entry with `kind: 'fallacy'`, pick `scope` (`per_claim` or `set`), set `enabled: true` when
+playground-validated, bump `JEV_QUESTION_SET_VERSION`, and add a characterization test if the
+wording comes from the research appendix.
 
 In Deno, use an `npm:` specifier:
 

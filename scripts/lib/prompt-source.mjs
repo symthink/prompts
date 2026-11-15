@@ -10,7 +10,7 @@ export const GENERATED_DIR = path.join(ROOT, 'src', 'generated');
 
 export const DELIVERIES = ['external-chat', 'symthink-api'];
 export const OUTPUTS = { single: ['prompt'], system_user: ['system', 'user'], decision: ['state'] };
-const DECISION_QUESTION_TYPES = ['boolean', 'choice', 'score', 'box'];
+const DECISION_QUESTION_TYPES = ['noul', 'score', 'choice'];
 export const USAGE_STATUSES = ['active', 'mirrored', 'experimental', 'deprecated', 'reference'];
 
 const PARTIAL_REF = /\{\{>\s*([\w-]+)\s*\}\}/g;
@@ -83,8 +83,32 @@ function assertDecisionQuestions(questions, dir) {
     if (typeof question.instructions !== 'string') {
       throw new Error(`${path.relative(ROOT, dir)}: questions.${key}.instructions must be a string`);
     }
-    if (question.choices != null && !Array.isArray(question.choices)) {
-      throw new Error(`${path.relative(ROOT, dir)}: questions.${key}.choices must be an array when present`);
+    if (question.type === 'score') {
+      if (
+        !Array.isArray(question.criteria) ||
+        question.criteria.length < 1 ||
+        question.criteria.length > 10 ||
+        !question.criteria.every((item) => typeof item === 'string')
+      ) {
+        throw new Error(
+          `${path.relative(ROOT, dir)}: questions.${key}.criteria must be a string array with 1–10 entries for score questions`,
+        );
+      }
+    } else if (question.type === 'choice') {
+      if (
+        !question.criteria ||
+        typeof question.criteria !== 'object' ||
+        Array.isArray(question.criteria) ||
+        !Object.values(question.criteria).every((item) => typeof item === 'string')
+      ) {
+        throw new Error(
+          `${path.relative(ROOT, dir)}: questions.${key}.criteria must be a string map for choice questions`,
+        );
+      }
+    } else if (question.criteria != null) {
+      if (typeof question.criteria !== 'object' || Array.isArray(question.criteria)) {
+        throw new Error(`${path.relative(ROOT, dir)}: questions.${key}.criteria must be an object when present on noul questions`);
+      }
     }
   }
 }

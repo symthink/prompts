@@ -61,9 +61,10 @@ Jev via the Vercel AI Gateway). They are **server-only**: set `delivery` to `sym
 produces the payload.
 
 Use the same `definePrompt` helper with `output: 'decision'`. Templates are `state.md` plus
-`questions.json` (not under `prompts/` until you add a real prompt). Each question has `type`,
-`instructions`, and optional `choices`. Question `instructions` strings are rendered with Mustache
-like `state.md`; `type`, `choices`, and question keys are passed through unchanged. See
+`questions.json` (not under `prompts/` until you add a real prompt). Each question has `type`
+(`noul`, `score`, or `choice`), `instructions`, and type-specific `criteria` when required. Question
+`instructions` strings are rendered with Mustache like `state.md`; `type`, `criteria`, and question
+keys are passed through unchanged. See
 `test/decision-prompt-example/` for a minimal worked example used only in tests.
 
 Register the definition in `src/symthink-api/index.ts` when the prompt is real. There is no
