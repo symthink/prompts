@@ -107,7 +107,10 @@ const fingerprint = fingerprintReviewUnit(unit);
 question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`). To add a fallacy, append
 an entry with `kind: 'fallacy'`, pick `scope` (`per_claim` or `set`), set `enabled: true` when
 playground-validated, bump `JEV_QUESTION_SET_VERSION`, and add a characterization test if the
-wording comes from the research appendix.
+wording comes from the research appendix. Set `minClaims` on entries that only make sense with
+enough Claims (questions that compare Claims use `2`); `buildReviewRequest` skips them otherwise.
+`polarity` says which answer is the criticism: `flag` when yes is the problem (fallacies,
+`distinctness`), `good` when no is. Set-level fallacies ship disabled until their playground gates pass.
 
 In Deno, use an `npm:` specifier:
 

@@ -144,8 +144,31 @@ describe('buildReviewRequest', () => {
       includeFallacies: true,
       includeSetFallacies: true,
     });
-    expect(Object.keys(questions)).toHaveLength(34);
+    // 7 unit + 4 relevant + 5 certainty + 4 per-Claim fallacies × 4 Claims; set-level entries are gated off.
+    expect(Object.keys(questions)).toHaveLength(32);
     expect(questions.hasty_generalisation_c1).toBeUndefined();
+    expect(questions.slippery_slope_set).toBeUndefined();
+    expect(questions.circular_set).toBeUndefined();
+  });
+
+  it('skips questions that compare Claims when the unit has fewer than two', () => {
+    const single: ReviewUnit = { ...SAMPLE_2_UNIT, claims: [SAMPLE_2_UNIT.claims[0]!] };
+    const { questions } = buildReviewRequest(single);
+    expect(questions.distinctness).toBeUndefined();
+    expect(questions.conclusion_follows).toBeDefined();
+    expect(questions.relevant_c1).toBeDefined();
+
+    const none: ReviewUnit = { ...SAMPLE_2_UNIT, claims: [] };
+    const empty = buildReviewRequest(none).questions;
+    expect(empty.distinctness).toBeUndefined();
+    expect(empty.conclusion_follows).toBeUndefined();
+    expect(empty.sufficiency).toBeDefined();
+  });
+
+  it('only names keys that exist in the request state', () => {
+    const { questions } = buildReviewRequest(SAMPLE_2_UNIT);
+    expect(questions.counterpoint?.instructions).not.toContain('the unit');
+    expect(questions.conclusion_follows?.instructions).not.toContain('the conclusion');
   });
 
   it('uses the claim state key and skips responds_to_question for nested units', () => {
@@ -187,10 +210,17 @@ describe('buildReviewRequest', () => {
     expect((stateRecord.claims as Record<string, string>).c1).toBe('Bars close late.');
   });
 
-  it('matches Sample 3 fallacy instructions for enabled per-Claim and set entries', () => {
+  it('matches Sample 3 fallacy instructions for per-Claim and set entries', () => {
     const questions = fallacyQuestionsWithHasty(SAMPLE_2_UNIT);
     for (const [id, expected] of Object.entries(SAMPLE_3_FALLACY_INSTRUCTIONS)) {
       if (id.startsWith('hasty_generalisation')) continue;
+      if (id.endsWith('_set')) {
+        // Set-level entries are disabled (owner gate) but keep their Sample 3 wording in the library.
+        const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === id)!;
+        const question = typeof entry.question === 'function' ? entry.question('idea') : entry.question;
+        expect(question.instructions, id).toBe(expected);
+        continue;
+      }
       expect(questions[id]?.instructions, id).toBe(expected);
     }
     expect(questions.hasty_generalisation_c2?.instructions).toBe(
@@ -219,5 +249,18 @@ describe('JEV_REVIEW_QUESTIONS', () => {
   it('keeps hasty generalisation disabled in the library', () => {
     const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === 'hasty_generalisation');
     expect(entry?.enabled).toBe(false);
+  });
+
+  it('keeps set-level fallacies disabled until the owner gates pass', () => {
+    for (const key of ['slippery_slope_set', 'circular_set']) {
+      const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === key);
+      expect(entry?.enabled, key).toBe(false);
+      expect(entry?.minClaims, key).toBe(2);
+    }
+  });
+
+  it('marks distinctness as a flag (yes is the criticism)', () => {
+    const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === 'distinctness');
+    expect(entry?.polarity).toBe('flag');
   });
 });

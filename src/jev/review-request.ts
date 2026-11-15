@@ -68,6 +68,7 @@ export function buildReviewRequest(
     if (entry.kind === 'fallacy' && !includeFallacies) continue;
     if (entry.scope === 'set' && !includeSetFallacies) continue;
     if (entry.key === 'responds_to_question' && unit.kind !== 'idea') continue;
+    if (entry.minClaims !== undefined && unit.claims.length < entry.minClaims) continue;
 
     switch (entry.scope) {
       case 'unit':

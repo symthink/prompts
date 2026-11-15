@@ -12,6 +12,8 @@ export type ReviewQuestionEntry = {
   polarity: ReviewQuestionPolarity;
   kind: ReviewQuestionKind;
   enabled: boolean;
+  /** Skip this entry when the unit has fewer direct Claims (e.g. 2 for questions that compare Claims). */
+  minClaims?: number;
   question: DecisionQuestion | ((subjectKey: 'idea' | 'claim', claimNum?: number) => DecisionQuestion);
 };
 
@@ -22,7 +24,11 @@ const SUFFICIENCY_CRITERIA = [
   'Give independent reasons and at least one piece of evidence, such as a fact, figure or example',
 ] as const;
 
-/* Playground: clarity, calibration, distinctness, counterpoint and conclusion_follows are unrun (qualitative-table draft). */
+/*
+ * Playground: clarity, calibration, distinctness, counterpoint and conclusion_follows are unrun
+ * (qualitative-table draft). Set-level fallacies stay disabled until the owner gates (variant 3b,
+ * `circular_set` swap) pass — see docs/work/argument-quality-incentives/README.md.
+ */
 
 const CLARITY_CRITERIA = [
   'Vague or several ideas at once',
@@ -98,9 +104,11 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
   {
     key: 'distinctness',
     scope: 'unit',
-    polarity: 'good',
+    // Yes ("two Claims make the same point") is the criticism.
+    polarity: 'flag',
     kind: 'rubric',
     enabled: true,
+    minClaims: 2,
     question: {
       type: 'noul',
       instructions: 'Do two or more items in `claims` make the same point?',
@@ -114,7 +122,7 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     enabled: true,
     question: (subjectKey) => ({
       type: 'noul',
-      instructions: `Does the unit acknowledge an objection or limit to \`${subjectKey}\`?`,
+      instructions: `Do \`${subjectKey}\` or the items in \`claims\` acknowledge an objection to \`${subjectKey}\`, or a limit on it?`,
     }),
   },
   {
@@ -123,9 +131,10 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     polarity: 'good',
     kind: 'rubric',
     enabled: true,
+    minClaims: 1,
     question: (subjectKey) => ({
       type: 'noul',
-      instructions: `Does the conclusion follow from the items in \`claims\` that support \`${subjectKey}\`?`,
+      instructions: `If the items in \`claims\` were true, would \`${subjectKey}\` follow from them?`,
     }),
   },
   {
@@ -198,7 +207,8 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     scope: 'set',
     polarity: 'flag',
     kind: 'fallacy',
-    enabled: true,
+    enabled: false,
+    minClaims: 2,
     question: {
       type: 'noul',
       instructions:
@@ -210,7 +220,8 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     scope: 'set',
     polarity: 'flag',
     kind: 'fallacy',
-    enabled: true,
+    enabled: false,
+    minClaims: 2,
     question: (subjectKey) => ({
       type: 'noul',
       instructions: `Do the items in \`claims\` support \`${subjectKey}\` only by restating it, or by relying on each other in a circle?`,
