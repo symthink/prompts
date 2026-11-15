@@ -1,37 +1,41 @@
 import type { DecisionPrompt, DecisionQuestion } from '../render/decision-questions.js';
 
 import { stripSymthinkGlyphs } from './glyphs.js';
-import { JEV_REVIEW_QUESTIONS, type ReviewQuestionEntry } from './review-questions.js';
+import {
+  JEV_REVIEW_QUESTIONS,
+  type ReviewQuestionEntry,
+  type ReviewStateKeys,
+} from './review-questions.js';
 import type { ReviewUnit } from './review-unit.js';
 
 export type BuildReviewRequestOptions = {
   includeFallacies?: boolean;
-  includeSetFallacies?: boolean;
 };
 
-function resolveQuestion(
-  entry: ReviewQuestionEntry,
-  subjectKey: 'idea' | 'claim',
-  claimNum?: number,
-): DecisionQuestion {
+function resolveQuestion(entry: ReviewQuestionEntry, keys: ReviewStateKeys): DecisionQuestion {
   const question = entry.question;
-  if (typeof question === 'function') {
-    return question(subjectKey, claimNum);
-  }
-  return question;
+  return typeof question === 'function' ? question(keys) : question;
 }
 
-/** Map a question key ending in `_cN` or `_subject` to the tree node id, or `null` for unit/set keys. */
-export function claimIdForQuestionKey(key: string, unit: ReviewUnit): string | null {
-  const subjectMatch = /^(.+)_subject$/.exec(key);
-  if (subjectMatch) return unit.subject.id;
+/** State keys for a unit: `idea` + `claims`, or `claim` + `supporting_claims` for nested units. */
+export function reviewStateKeys(unit: Pick<ReviewUnit, 'kind'>): ReviewStateKeys {
+  return unit.kind === 'idea'
+    ? { subject: 'idea', claims: 'claims' }
+    : { subject: 'claim', claims: 'supporting_claims' };
+}
 
-  const claimMatch = /^(.+)_c(\d+)$/.exec(key);
-  if (claimMatch) {
-    const index = Number(claimMatch[2]) - 1;
-    return unit.claims[index]?.id ?? null;
-  }
-  return null;
+const ENDS_SENTENCE = /[.?!]["'”’)\]]*$/;
+
+/**
+ * Join Claim texts into one paragraph, in order. Glyphs are replaced first (P19); a text with no
+ * closing punctuation gets a full stop so sentences stay separate.
+ */
+export function joinClaimsParagraph(texts: readonly string[]): string {
+  return texts
+    .map((text) => stripSymthinkGlyphs(text.trim()).trim())
+    .filter((text) => text.length > 0)
+    .map((text) => (ENDS_SENTENCE.test(text) ? text : `${text}.`))
+    .join(' ');
 }
 
 /** Build the Jev review request for one Idea or nested-Claim unit. */
@@ -39,18 +43,13 @@ export function buildReviewRequest(
   unit: ReviewUnit,
   options: BuildReviewRequestOptions = {},
 ): DecisionPrompt {
-  const { includeFallacies = true, includeSetFallacies = true } = options;
-  const subjectKey: 'idea' | 'claim' = unit.kind === 'idea' ? 'idea' : 'claim';
-
-  const claims: Record<string, string> = {};
-  unit.claims.forEach((claim, index) => {
-    claims[`c${index + 1}`] = stripSymthinkGlyphs(claim.text);
-  });
+  const { includeFallacies = true } = options;
+  const keys = reviewStateKeys(unit);
 
   const state: Record<string, unknown> = {
     question: stripSymthinkGlyphs(unit.question.text),
-    [subjectKey]: stripSymthinkGlyphs(unit.subject.text),
-    claims,
+    [keys.subject]: stripSymthinkGlyphs(unit.subject.text),
+    [keys.claims]: joinClaimsParagraph(unit.claims.map((claim) => claim.text)),
   };
 
   if (unit.kind === 'nested_claim' && unit.context.length > 0) {
@@ -59,40 +58,12 @@ export function buildReviewRequest(
 
   const questions: Record<string, DecisionQuestion> = {};
 
-  const addQuestion = (id: string, question: DecisionQuestion) => {
-    questions[id] = question;
-  };
-
   for (const entry of JEV_REVIEW_QUESTIONS) {
     if (!entry.enabled) continue;
     if (entry.kind === 'fallacy' && !includeFallacies) continue;
-    if (entry.scope === 'set' && !includeSetFallacies) continue;
     if (entry.key === 'responds_to_question' && unit.kind !== 'idea') continue;
     if (entry.minClaims !== undefined && unit.claims.length < entry.minClaims) continue;
-
-    switch (entry.scope) {
-      case 'unit':
-        addQuestion(entry.key, resolveQuestion(entry, subjectKey));
-        break;
-      case 'set':
-        addQuestion(entry.key, resolveQuestion(entry, subjectKey));
-        break;
-      case 'per_node':
-        addQuestion(`${entry.key}_subject`, resolveQuestion(entry, subjectKey));
-        unit.claims.forEach((_claim, index) => {
-          const claimNum = index + 1;
-          addQuestion(`${entry.key}_c${claimNum}`, resolveQuestion(entry, subjectKey, claimNum));
-        });
-        break;
-      case 'per_claim':
-        unit.claims.forEach((_claim, index) => {
-          const claimNum = index + 1;
-          addQuestion(`${entry.key}_c${claimNum}`, resolveQuestion(entry, subjectKey, claimNum));
-        });
-        break;
-      default:
-        break;
-    }
+    questions[entry.key] = resolveQuestion(entry, keys);
   }
 
   return { state, questions };

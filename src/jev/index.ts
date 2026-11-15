@@ -3,10 +3,15 @@ export { JEV_QUESTION_SET_VERSION } from './version.js';
 export { stripSymthinkGlyphs } from './glyphs.js';
 export {
   buildReviewRequest,
-  claimIdForQuestionKey,
+  joinClaimsParagraph,
+  reviewStateKeys,
   type BuildReviewRequestOptions,
 } from './review-request.js';
-export { JEV_REVIEW_QUESTIONS, type ReviewQuestionEntry } from './review-questions.js';
+export {
+  JEV_REVIEW_QUESTIONS,
+  type ReviewQuestionEntry,
+  type ReviewStateKeys,
+} from './review-questions.js';
 export { fingerprintReviewUnit, type ReviewNode, type ReviewUnit } from './review-unit.js';
 
 export type {

@@ -86,7 +86,7 @@ No production decision prompts ship in this package yet—a test-only example li
 `test/decision-prompt-example/`.
 
 **Jev helpers** (`@symthink/prompts/jev`) build TypeSafe System One requests for argument-quality
-features: certainty tagging (Sample 1), full Idea review (Samples 2–3) and review-unit fingerprints.
+features: certainty tagging (Sample 1), full Idea review and review-unit fingerprints.
 
 ```ts
 import {
@@ -99,18 +99,28 @@ import {
 const tagRequest = buildCertaintyRequest('Later bus service would probably reduce drunk driving downtown.');
 const typeInt = typeIntFromCertaintyScore(0.89); // 5
 
-const reviewRequest = buildReviewRequest(unit, { includeFallacies: true, includeSetFallacies: true });
+const reviewRequest = buildReviewRequest(unit, { includeFallacies: true });
 const fingerprint = fingerprintReviewUnit(unit);
 ```
 
 `JEV_QUESTION_SET_VERSION` bumps whenever Jev question wording in `src/jev/` changes. The review
-question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`). To add a fallacy, append
-an entry with `kind: 'fallacy'`, pick `scope` (`per_claim` or `set`), set `enabled: true` when
-playground-validated, bump `JEV_QUESTION_SET_VERSION`, and add a characterization test if the
-wording comes from the research appendix. Set `minClaims` on entries that only make sense with
-enough Claims (questions that compare Claims use `2`); `buildReviewRequest` skips them otherwise.
-`polarity` says which answer is the criticism: `flag` when yes is the problem (fallacies,
-`distinctness`), `good` when no is. Set-level fallacies ship disabled until their playground gates pass.
+question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`).
+
+The review state sends the direct Claims as **one paragraph**, joined in order, and every question
+is asked once against them taken together:
+
+- Idea unit: `{ question, idea, claims }`
+- Nested-Claim unit: `{ question, context?, claim, supporting_claims }`
+
+Question ids are the entry keys (`relevant`, `slippery_slope`, …); there are no per-Claim ids.
+Each entry's `question` receives the unit's state keys (`reviewStateKeys(unit)`), so its wording
+names `claims` or `supporting_claims` as appropriate.
+
+To add a fallacy, append an entry with `kind: 'fallacy'`, set `enabled: true` when
+playground-validated, and bump `JEV_QUESTION_SET_VERSION`. Set `minClaims` on entries that only make
+sense with enough Claims (questions that compare Claims use `2`); `buildReviewRequest` skips them
+otherwise. `polarity` says which answer is the criticism: `flag` when yes is the problem (fallacies,
+`distinctness`), `good` when no is.
 
 In Deno, use an `npm:` specifier:
 

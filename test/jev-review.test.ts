@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildReviewRequest,
-  claimIdForQuestionKey,
   fingerprintReviewUnit,
+  joinClaimsParagraph,
   JEV_REVIEW_QUESTIONS,
   stripSymthinkGlyphs,
   type ReviewUnit,
@@ -54,54 +54,6 @@ const SAMPLE_2_UNIT: ReviewUnit = {
   ],
 };
 
-/** Research Sample 3 fallacy instructions (per-Claim and set only). */
-const SAMPLE_3_FALLACY_INSTRUCTIONS: Record<string, string> = {
-  slippery_slope_set:
-    'Taken in order, do the items in `claims` form a chain in which each step is assumed to lead to the next, ending in an extreme outcome, without showing why each step follows?',
-  circular_set:
-    'Do the items in `claims` support `idea` only by restating it, or by relying on each other in a circle?',
-  appeal_to_popularity_c1: 'Does `claims.c1` argue that `idea` is right because many people believe or want it?',
-  appeal_to_popularity_c2: 'Does `claims.c2` argue that `idea` is right because many people believe or want it?',
-  appeal_to_popularity_c3: 'Does `claims.c3` argue that `idea` is right because many people believe or want it?',
-  appeal_to_popularity_c4: 'Does `claims.c4` argue that `idea` is right because many people believe or want it?',
-  personal_attack_c1: 'Does `claims.c1` dismiss a view by attacking the person who holds it instead of the view itself?',
-  personal_attack_c2: 'Does `claims.c2` dismiss a view by attacking the person who holds it instead of the view itself?',
-  personal_attack_c3: 'Does `claims.c3` dismiss a view by attacking the person who holds it instead of the view itself?',
-  personal_attack_c4: 'Does `claims.c4` dismiss a view by attacking the person who holds it instead of the view itself?',
-  hasty_generalisation_c1: 'Does `claims.c1` draw a broad conclusion from one or a few cases?',
-  hasty_generalisation_c2: 'Does `claims.c2` draw a broad conclusion from one or a few cases?',
-  hasty_generalisation_c3: 'Does `claims.c3` draw a broad conclusion from one or a few cases?',
-  hasty_generalisation_c4: 'Does `claims.c4` draw a broad conclusion from one or a few cases?',
-  false_dilemma_c1: 'Does `claims.c1` present only two options when more exist?',
-  false_dilemma_c2: 'Does `claims.c2` present only two options when more exist?',
-  false_dilemma_c3: 'Does `claims.c3` present only two options when more exist?',
-  false_dilemma_c4: 'Does `claims.c4` present only two options when more exist?',
-  slippery_slope_c1:
-    'Does `claims.c1` claim one step will lead to an extreme outcome without showing why each step follows?',
-  slippery_slope_c2:
-    'Does `claims.c2` claim one step will lead to an extreme outcome without showing why each step follows?',
-  slippery_slope_c3:
-    'Does `claims.c3` claim one step will lead to an extreme outcome without showing why each step follows?',
-  slippery_slope_c4:
-    'Does `claims.c4` claim one step will lead to an extreme outcome without showing why each step follows?',
-};
-
-function fallacyQuestionsWithHasty(unit: ReviewUnit) {
-  const base = buildReviewRequest(unit, { includeFallacies: true, includeSetFallacies: true });
-  const hastyEntry = JEV_REVIEW_QUESTIONS.find((entry) => entry.key === 'hasty_generalisation')!;
-  const questions = { ...base.questions };
-  unit.claims.forEach((_claim, index) => {
-    const claimNum = index + 1;
-    const id = `hasty_generalisation_c${claimNum}`;
-    const question =
-      typeof hastyEntry.question === 'function'
-        ? hastyEntry.question('idea', claimNum)
-        : hastyEntry.question;
-    questions[id] = question;
-  });
-  return questions;
-}
-
 describe('fingerprintReviewUnit', () => {
   it('is stable regardless of object key order in inputs', () => {
     const a = fingerprintReviewUnit(SAMPLE_2_UNIT);
@@ -139,39 +91,86 @@ describe('fingerprintReviewUnit', () => {
 });
 
 describe('buildReviewRequest', () => {
-  it('includes 34 questions for four Claims with enabled fallacies (hasty disabled)', () => {
-    const { questions } = buildReviewRequest(SAMPLE_2_UNIT, {
-      includeFallacies: true,
-      includeSetFallacies: true,
+  it('sends the Claims as one paragraph, in order', () => {
+    const { state } = buildReviewRequest(SAMPLE_2_UNIT);
+    expect(state).toEqual({
+      question: 'How can the city cut drunk driving downtown?',
+      idea: 'Extending weekend bus service until 2 a.m. could cut drunk driving downtown.',
+      claims:
+        "Downtown bars close at 1:30 a.m., but the last bus leaves at midnight. Everyone I know thinks the buses should run later. The transit director has never ridden a bus in his life, so his objections don't count. The new library opened last spring.",
     });
-    // 7 unit + 4 relevant + 5 certainty + 4 per-Claim fallacies × 4 Claims; set-level entries are gated off.
-    expect(Object.keys(questions)).toHaveLength(32);
-    expect(questions.hasty_generalisation_c1).toBeUndefined();
-    expect(questions.slippery_slope_set).toBeUndefined();
-    expect(questions.circular_set).toBeUndefined();
   });
 
-  it('skips questions that compare Claims when the unit has fewer than two', () => {
+  it('asks each enabled question once for the unit, with no per-Claim ids', () => {
+    const { questions } = buildReviewRequest(SAMPLE_2_UNIT, { includeFallacies: true });
+    expect(Object.keys(questions).sort()).toEqual(
+      [
+        'responds_to_question',
+        'relevant',
+        'sufficiency',
+        'clarity',
+        'distinctness',
+        'counterpoint',
+        'conclusion_follows',
+        'appeal_to_popularity',
+        'personal_attack',
+        'false_dilemma',
+        'slippery_slope',
+        'circular_reasoning',
+      ].sort(),
+    );
+    expect(Object.keys(questions).some((key) => /_c\d+$/.test(key))).toBe(false);
+    expect(questions.hasty_generalisation).toBeUndefined();
+  });
+
+  it('measures fallacies against the Claims taken together', () => {
+    const { questions } = buildReviewRequest(SAMPLE_2_UNIT);
+    expect(questions.slippery_slope?.instructions).toBe(
+      'Do `claims` assume that one step will lead, through further steps, to an extreme outcome without showing why each step follows?',
+    );
+    expect(questions.circular_reasoning?.instructions).toBe(
+      'Do `claims` support `idea` only by restating it, or by relying on each other in a circle?',
+    );
+    expect(questions.relevant?.instructions).toBe(
+      'Taken together, do `claims` bear directly on whether `idea` is true or wise?',
+    );
+  });
+
+  it('leaves fallacies out when asked', () => {
+    const { questions } = buildReviewRequest(SAMPLE_2_UNIT, { includeFallacies: false });
+    expect(questions.personal_attack).toBeUndefined();
+    expect(questions.sufficiency).toBeDefined();
+  });
+
+  it('skips questions that need more Claims than the unit has', () => {
     const single: ReviewUnit = { ...SAMPLE_2_UNIT, claims: [SAMPLE_2_UNIT.claims[0]!] };
     const { questions } = buildReviewRequest(single);
     expect(questions.distinctness).toBeUndefined();
     expect(questions.conclusion_follows).toBeDefined();
-    expect(questions.relevant_c1).toBeDefined();
+    expect(questions.relevant).toBeDefined();
+    expect(questions.circular_reasoning).toBeDefined();
 
     const none: ReviewUnit = { ...SAMPLE_2_UNIT, claims: [] };
-    const empty = buildReviewRequest(none).questions;
-    expect(empty.distinctness).toBeUndefined();
-    expect(empty.conclusion_follows).toBeUndefined();
-    expect(empty.sufficiency).toBeDefined();
+    const empty = buildReviewRequest(none);
+    expect(empty.state).toHaveProperty('claims', '');
+    expect(empty.questions.relevant).toBeUndefined();
+    expect(empty.questions.conclusion_follows).toBeUndefined();
+    expect(empty.questions.personal_attack).toBeUndefined();
+    expect(empty.questions.sufficiency).toBeDefined();
   });
 
   it('only names keys that exist in the request state', () => {
-    const { questions } = buildReviewRequest(SAMPLE_2_UNIT);
-    expect(questions.counterpoint?.instructions).not.toContain('the unit');
-    expect(questions.conclusion_follows?.instructions).not.toContain('the conclusion');
+    for (const unit of [SAMPLE_2_UNIT, { ...SAMPLE_2_UNIT, kind: 'nested_claim' as const }]) {
+      const { state, questions } = buildReviewRequest(unit);
+      for (const [id, question] of Object.entries(questions)) {
+        for (const [, name] of question.instructions.matchAll(/`([a-z_]+)`/g)) {
+          expect(state, `${unit.kind}:${id} names ${name}`).toHaveProperty(name!);
+        }
+      }
+    }
   });
 
-  it('uses the claim state key and skips responds_to_question for nested units', () => {
+  it('uses claim and supporting_claims, and skips responds_to_question, for nested units', () => {
     const nested: ReviewUnit = {
       ...SAMPLE_2_UNIT,
       kind: 'nested_claim',
@@ -179,21 +178,21 @@ describe('buildReviewRequest', () => {
       context: [{ text: 'Parent idea text.' }],
       subject: { ...SAMPLE_2_UNIT.claims[0]!, id: 'nested-subject' },
       claims: [
-        {
-          id: 'child-1',
-          text: 'Child claim one.',
-          label: 'Claim',
-          typeInt: 8,
-          sources: [],
-        },
+        { id: 'child-1', text: 'Child claim one', label: 'Claim', typeInt: 8, sources: [] },
+        { id: 'child-2', text: 'Child claim two.', label: 'Claim', typeInt: 8, sources: [] },
       ],
     };
     const { state, questions } = buildReviewRequest(nested);
-    expect(state).toHaveProperty('claim');
-    expect(state).not.toHaveProperty('idea');
-    expect((state as Record<string, unknown>).context).toEqual(['Parent idea text.']);
+    expect(state).toEqual({
+      question: 'How can the city cut drunk driving downtown?',
+      claim: 'Downtown bars close at 1:30 a.m., but the last bus leaves at midnight.',
+      supporting_claims: 'Child claim one. Child claim two.',
+      context: ['Parent idea text.'],
+    });
     expect(questions.responds_to_question).toBeUndefined();
-    expect(questions.relevant_c1?.instructions).toContain('`claim`');
+    expect(questions.relevant?.instructions).toBe(
+      'Taken together, do `supporting_claims` bear directly on whether `claim` is true or wise?',
+    );
   });
 
   it('strips Symthink glyphs from state text', () => {
@@ -201,39 +200,25 @@ describe('buildReviewRequest', () => {
       ...SAMPLE_2_UNIT,
       question: { text: 'How can we fix this❓' },
       subject: { ...SAMPLE_2_UNIT.subject, text: 'Maybe buses help💡' },
-      claims: [{ ...SAMPLE_2_UNIT.claims[0]!, text: 'Bars close late🕫' }],
+      claims: [
+        { ...SAMPLE_2_UNIT.claims[0]!, text: 'Bars close late🕫' },
+        { ...SAMPLE_2_UNIT.claims[1]!, text: 'What if buses ran later?💡' },
+      ],
     };
     const { state } = buildReviewRequest(withGlyphs);
-    const stateRecord = state as Record<string, unknown>;
-    expect(stateRecord.question).toBe('How can we fix this?');
-    expect(stateRecord.idea).toBe('Maybe buses help.');
-    expect((stateRecord.claims as Record<string, string>).c1).toBe('Bars close late.');
-  });
-
-  it('matches Sample 3 fallacy instructions for per-Claim and set entries', () => {
-    const questions = fallacyQuestionsWithHasty(SAMPLE_2_UNIT);
-    for (const [id, expected] of Object.entries(SAMPLE_3_FALLACY_INSTRUCTIONS)) {
-      if (id.startsWith('hasty_generalisation')) continue;
-      if (id.endsWith('_set')) {
-        // Set-level entries are disabled (owner gate) but keep their Sample 3 wording in the library.
-        const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === id)!;
-        const question = typeof entry.question === 'function' ? entry.question('idea') : entry.question;
-        expect(question.instructions, id).toBe(expected);
-        continue;
-      }
-      expect(questions[id]?.instructions, id).toBe(expected);
-    }
-    expect(questions.hasty_generalisation_c2?.instructions).toBe(
-      'Does `claims.c2` conclude something about a whole group from one or a few personal examples or anecdotes?',
-    );
+    expect(state).toMatchObject({
+      question: 'How can we fix this?',
+      idea: 'Maybe buses help.',
+      claims: 'Bars close late. What if buses ran later?',
+    });
   });
 });
 
-describe('claimIdForQuestionKey', () => {
-  it('maps per-claim and subject keys to node ids', () => {
-    expect(claimIdForQuestionKey('relevant_c3', SAMPLE_2_UNIT)).toBe('c3');
-    expect(claimIdForQuestionKey('certainty_subject', SAMPLE_2_UNIT)).toBe('idea-1');
-    expect(claimIdForQuestionKey('sufficiency', SAMPLE_2_UNIT)).toBeNull();
+describe('joinClaimsParagraph', () => {
+  it('adds a full stop only where a Claim has no closing punctuation', () => {
+    expect(joinClaimsParagraph(['One', 'Two!', '  ', 'He said "three."', 'Four?'])).toBe(
+      'One. Two! He said "three." Four?',
+    );
   });
 });
 
@@ -251,11 +236,11 @@ describe('JEV_REVIEW_QUESTIONS', () => {
     expect(entry?.enabled).toBe(false);
   });
 
-  it('keeps set-level fallacies disabled until the owner gates pass', () => {
-    for (const key of ['slippery_slope_set', 'circular_set']) {
+  it('enables slippery slope and circular reasoning for the Claims taken together', () => {
+    for (const key of ['slippery_slope', 'circular_reasoning']) {
       const entry = JEV_REVIEW_QUESTIONS.find((item) => item.key === key);
-      expect(entry?.enabled, key).toBe(false);
-      expect(entry?.minClaims, key).toBe(2);
+      expect(entry?.enabled, key).toBe(true);
+      expect(entry?.minClaims, key).toBe(1);
     }
   });
 
