@@ -4,121 +4,164 @@ export type ReviewQuestionPolarity = 'good' | 'flag';
 export type ReviewQuestionKind = 'rubric' | 'fallacy';
 
 /**
- * State keys a review question may name. Idea units send `idea` + `claims`; nested-Claim units send
- * `claim` + `supporting_claims`, so Jev reads the paragraph as support for the Claim above it.
+ * State key a review question may name for the unit's subject. Every unit sends `question` and
+ * `support`; the subject goes under `idea` when it is an Idea (`typeInt` 4-6) and `claim` otherwise,
+ * so Jev reads the node as what it is.
  */
 export type ReviewStateKeys = {
   subject: 'idea' | 'claim';
-  claims: 'claims' | 'supporting_claims';
 };
 
 export type ReviewQuestionEntry = {
   key: string;
+  /** `good`: no (or a low score) is the criticism. `flag`: yes is the criticism. */
   polarity: ReviewQuestionPolarity;
   kind: ReviewQuestionKind;
+  /** Disabled entries stay in the library but are never sent. Flip to `true` to turn one on. */
   enabled: boolean;
-  /** Skip this entry when the unit has fewer direct Claims (e.g. 2 for questions that compare Claims). */
-  minClaims?: number;
+  /** Ask only in `idea` units, where the subject sits directly under the Question. */
+  ideaUnitOnly?: boolean;
+  /** Skip this entry when the unit has fewer supporting statements (Question children do not count). */
+  minSupporting?: number;
   question: DecisionQuestion | ((keys: ReviewStateKeys) => DecisionQuestion);
 };
 
-const SUFFICIENCY_CRITERIA = [
-  'Only restate the main point or do not address it',
-  'Give one reason',
-  'Give two or more independent reasons',
-  'Give independent reasons and at least one piece of evidence, such as a fact, figure or example',
-] as const;
-
 /*
- * Every question is asked once per unit, against the Claims taken together as one paragraph.
- * Claims often only make sense in combination, so judging each one alone against its parent gave
- * misleading answers (owner, 2026-11-15).
+ * Every question is asked once per unit, about the `support` statements taken together. The wording is
+ * the merged set from the support-unit review research (jev-questions-v3.json).
  *
- * Playground: the paragraph form, clarity, distinctness, counterpoint and conclusion_follows are
- * unrun. Fallacy flags still reach authors only when the app's `JEV_FALLACY_FLAGS_ENABLED` is on.
+ * Playground: NOT YET RUN. Every wording below is unrun, and `idea_compound` and `hasty_generalisation`
+ * ship disabled until the playground shows they separate their cases. Fallacy flags still reach authors
+ * only when the app's `JEV_FALLACY_FLAGS_ENABLED` is on.
+ *
+ * Wording is matched word for word to the JSON; a snapshot test makes any change deliberate.
  */
-
-const CLARITY_CRITERIA = [
-  'Vague or several ideas at once',
-  'One idea but loosely worded',
-  'One specific, checkable statement',
-] as const;
 
 export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
   {
-    key: 'responds_to_question',
+    key: 'answers_question',
     polarity: 'good',
     kind: 'rubric',
     enabled: true,
+    ideaUnitOnly: true,
     question: ({ subject }) => ({
-      type: 'noul',
-      instructions: `Does \`${subject}\` respond to \`question\`?`,
-    }),
-  },
-  {
-    key: 'relevant',
-    polarity: 'good',
-    kind: 'rubric',
-    enabled: true,
-    minClaims: 1,
-    question: ({ subject, claims }) => ({
-      type: 'noul',
-      instructions: `Taken together, do \`${claims}\` bear directly on whether \`${subject}\` is true or wise?`,
-    }),
-  },
-  {
-    key: 'sufficiency',
-    polarity: 'good',
-    kind: 'rubric',
-    enabled: true,
-    question: ({ subject, claims }) => ({
       type: 'score',
-      instructions: `Taken together, how well do \`${claims}\` support \`${subject}\`? Judge the reasoning only, not whether you agree with the position.`,
-      criteria: [...SUFFICIENCY_CRITERIA],
+      instructions: `How directly does \`${subject}\` answer \`question\`?`,
+      criteria: [
+        'The idea is about a different subject than the question',
+        "The idea is on the question's topic but does not propose an answer to it",
+        'The idea proposes an answer to a related question, not the one asked',
+        'The idea proposes a possible answer to the question as asked, or to one part of it',
+      ],
     }),
   },
   {
-    key: 'clarity',
+    key: 'support_backs_idea',
     polarity: 'good',
     kind: 'rubric',
     enabled: true,
     question: ({ subject }) => ({
       type: 'score',
-      instructions: `How clear and focused is the wording of \`${subject}\`?`,
-      criteria: [...CLARITY_CRITERIA],
+      instructions: `How well do the statements in \`support\` work as reasons to accept \`${subject}\`? Judge the reasoning only, not whether the idea is right. Questions, and statements that argue against the idea, do not count as reasons to accept it.`,
+      criteria: [
+        'Every statement is about a different subject than the idea',
+        'The statements repeat the idea or give background on its topic, and none gives a reason to accept it',
+        'The statements back up a fact the idea relies on, such as that a problem exists, but none gives a reason to accept the main thing the idea proposes',
+        'At least one statement gives a reason to accept the main thing the idea proposes',
+      ],
     }),
   },
   {
-    key: 'distinctness',
-    // Yes ("two Claims make the same point") is the criticism.
+    key: 'support_checkable',
+    polarity: 'good',
+    kind: 'rubric',
+    enabled: true,
+    question: {
+      type: 'score',
+      instructions:
+        'How easy would it be to check the factual statements in `support` against evidence? Ignore any that are questions.',
+      criteria: [
+        'Too vague to check: it is unclear what observation would count for or against them',
+        'Checkable in principle, but they leave open who, where, when or how much',
+        'At least one is specific enough that a reader can tell what kind of evidence would confirm or contradict it',
+      ],
+    },
+  },
+  {
+    key: 'considers_downside',
+    polarity: 'good',
+    kind: 'rubric',
+    enabled: true,
+    question: ({ subject }) => ({
+      type: 'noul',
+      instructions: `Does \`${subject}\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?`,
+      criteria: {
+        true: 'At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it',
+        false:
+          'The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea',
+      },
+    }),
+  },
+  {
+    key: 'support_repeats',
+    // Yes ("two statements make the same point") is the criticism.
     polarity: 'flag',
     kind: 'rubric',
     enabled: true,
-    minClaims: 2,
-    question: ({ claims }) => ({
+    minSupporting: 2,
+    question: {
       type: 'noul',
-      instructions: `Do two or more statements in \`${claims}\` make the same point?`,
+      instructions: 'Do two or more statements in `support` make the same point in different words?',
+      criteria: {
+        true: 'At least two statements could be merged without losing a reason',
+        false: 'Each statement adds something the others do not',
+      },
+    },
+  },
+  {
+    key: 'question_leading',
+    polarity: 'flag',
+    kind: 'rubric',
+    enabled: true,
+    ideaUnitOnly: true,
+    question: {
+      type: 'noul',
+      instructions: 'Does the wording of `question` assume or push a particular answer?',
+      criteria: {
+        true: 'It takes a conclusion for granted, or uses wording that favours one answer',
+        false: 'It asks without taking an answer for granted. A plain factual question counts here',
+      },
+    },
+  },
+  {
+    key: 'loaded_wording',
+    polarity: 'flag',
+    kind: 'rubric',
+    enabled: true,
+    question: ({ subject }) => ({
+      type: 'noul',
+      instructions: `Does \`${subject}\` or any item in \`support\` use insulting, mocking or contemptuous wording about a person or a group of people?`,
+      criteria: {
+        true: 'At least one word or phrase insults, mocks or shows contempt for a person or group',
+        false:
+          'The wording is neutral about people, even if it criticises an idea, a policy or an institution',
+      },
     }),
   },
   {
-    key: 'counterpoint',
-    polarity: 'good',
+    key: 'idea_compound',
+    // Candidate: stays off until the playground shows it separates its cases (owner gate).
+    // Yes ("separate proposals joined") is the criticism.
+    polarity: 'flag',
     kind: 'rubric',
-    enabled: true,
-    question: ({ subject, claims }) => ({
+    enabled: false,
+    question: ({ subject }) => ({
       type: 'noul',
-      instructions: `Do \`${subject}\` or \`${claims}\` acknowledge an objection to \`${subject}\`, or a limit on it?`,
-    }),
-  },
-  {
-    key: 'conclusion_follows',
-    polarity: 'good',
-    kind: 'rubric',
-    enabled: true,
-    minClaims: 1,
-    question: ({ subject, claims }) => ({
-      type: 'noul',
-      instructions: `If \`${claims}\` were true, would \`${subject}\` follow from them?`,
+      instructions: `Does \`${subject}\` propose two or more separate things that could each be accepted or rejected on its own?`,
+      criteria: {
+        true: "It joins separate proposals, for example with 'and' or 'as well as'",
+        false: 'It proposes one thing, even if it gives details of that one thing',
+      },
     }),
   },
   {
@@ -126,10 +169,9 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     polarity: 'flag',
     kind: 'fallacy',
     enabled: true,
-    minClaims: 1,
-    question: ({ subject, claims }) => ({
+    question: ({ subject }) => ({
       type: 'noul',
-      instructions: `Do \`${claims}\` argue that \`${subject}\` is right because many people believe or want it?`,
+      instructions: `Do the statements in \`support\` argue that \`${subject}\` is right because many people believe or want it?`,
     }),
   },
   {
@@ -137,54 +179,53 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     polarity: 'flag',
     kind: 'fallacy',
     enabled: true,
-    minClaims: 1,
-    question: ({ claims }) => ({
+    question: {
       type: 'noul',
-      instructions: `Do \`${claims}\` dismiss a view by attacking the person who holds it instead of the view itself?`,
-    }),
+      instructions:
+        'Do the statements in `support` dismiss a view by attacking the person who holds it instead of the view itself?',
+    },
   },
   {
     key: 'false_dilemma',
     polarity: 'flag',
     kind: 'fallacy',
     enabled: true,
-    minClaims: 1,
-    question: ({ claims }) => ({
+    question: {
       type: 'noul',
-      instructions: `Do \`${claims}\` present only two options when more exist?`,
-    }),
+      instructions: 'Do the statements in `support` present only two options when more exist?',
+    },
   },
   {
     key: 'slippery_slope',
     polarity: 'flag',
     kind: 'fallacy',
     enabled: true,
-    minClaims: 1,
-    question: ({ claims }) => ({
+    question: {
       type: 'noul',
-      instructions: `Do \`${claims}\` assume that one step will lead, through further steps, to an extreme outcome without showing why each step follows?`,
-    }),
+      instructions:
+        'Do the statements in `support` assume that one step will lead, through further steps, to an extreme outcome without showing why each step follows?',
+    },
   },
   {
     key: 'circular_reasoning',
     polarity: 'flag',
     kind: 'fallacy',
     enabled: true,
-    minClaims: 1,
-    question: ({ subject, claims }) => ({
+    question: ({ subject }) => ({
       type: 'noul',
-      instructions: `Do \`${claims}\` support \`${subject}\` only by restating it, or by relying on each other in a circle?`,
+      instructions: `Do the statements in \`support\` back \`${subject}\` only by relying on each other in a circle?`,
     }),
   },
   {
+    // Not in jev-questions-v3.json: carried over from 2.0.0 and re-pointed at `support`. Disabled as before.
     key: 'hasty_generalisation',
     polarity: 'flag',
     kind: 'fallacy',
     enabled: false,
-    minClaims: 1,
-    question: ({ claims }) => ({
+    question: {
       type: 'noul',
-      instructions: `Do \`${claims}\` conclude something about a whole group from one or a few personal examples or anecdotes?`,
-    }),
+      instructions:
+        'Do the statements in `support` conclude something about a whole group from one or a few personal examples or anecdotes?',
+    },
   },
 ] as const;

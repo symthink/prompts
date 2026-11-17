@@ -106,21 +106,50 @@ const fingerprint = fingerprintReviewUnit(unit);
 `JEV_QUESTION_SET_VERSION` bumps whenever Jev question wording in `src/jev/` changes. The review
 question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`).
 
-The review state sends the direct Claims as **one paragraph**, joined in order, and every question
-is asked once against them taken together:
+A review unit is one Idea or Claim and its **support**: the statements, Questions and other children
+directly under it. `ReviewUnit` is
+`{ nodeId, kind: 'idea' | 'nested', question: { text }, context: { text }[], subject, support }`,
+where `subject` and each `support` item are `ReviewNode`s (`{ id, text, label, typeInt, sources }`).
+`idea` is an Idea directly under a Question; `nested` is an Idea or Claim reached further down.
+`fingerprintReviewUnit(unit)` hashes the Question text, the context texts, the subject and every
+`support` item (text, label, `typeInt`, sources) in order, and `supportingCount(unit)` counts the
+`support` items outside the Question band (`typeInt` 0-3).
 
-- Idea unit: `{ question, idea, claims }`
-- Nested-Claim unit: `{ question, context?, claim, supporting_claims }`
+`buildReviewRequest` sends the support as an **array of strings**, in order, with empty items
+dropped, and every question is asked once against the statements taken together. Symthink glyphs are
+replaced in every text:
 
-Question ids are the entry keys (`relevant`, `slippery_slope`, …); there are no per-Claim ids.
-Each entry's `question` receives the unit's state keys (`reviewStateKeys(unit)`), so its wording
-names `claims` or `supporting_claims` as appropriate.
+- Idea unit: `{ question, idea, support }`
+- Nested unit: `{ question, context?, idea | claim, support }`, where the subject sits under `idea`
+  when its `typeInt` is 4-6 and `claim` otherwise, and `context` (the texts between the Question and
+  the subject) is sent only when it is not empty. In nested units `question` and `context` are
+  background; no question names `context`.
 
-To add a fallacy, append an entry with `kind: 'fallacy'`, set `enabled: true` when
-playground-validated, and bump `JEV_QUESTION_SET_VERSION`. Set `minClaims` on entries that only make
-sense with enough Claims (questions that compare Claims use `2`); `buildReviewRequest` skips them
-otherwise. `polarity` says which answer is the criticism: `flag` when yes is the problem (fallacies,
-`distinctness`), `good` when no is.
+Question ids are the entry keys (`answers_question`, `support_backs_idea`, `slippery_slope`, …); there
+are no per-item ids. Each entry's `question` receives the unit's subject key
+(`reviewStateKeys(unit)`), so its wording names `idea` or `claim` as appropriate. Entries carry:
+
+- `polarity`: `flag` when yes is the problem (`support_repeats`, `question_leading`,
+  `loaded_wording`, `idea_compound`, every fallacy), `good` when no is (or a low score).
+- `kind`: `rubric` or `fallacy`. `buildReviewRequest(unit, { includeFallacies: false })` skips
+  fallacies.
+- `enabled`: disabled entries are never sent.
+- `ideaUnitOnly`: skipped in `nested` units (`answers_question`, `question_leading`).
+- `minSupporting`: skipped when `supportingCount(unit)` is lower (`support_repeats` uses `2`).
+
+The set is the merged question set from the support-unit review research
+(`JEV_QUESTION_SET_VERSION` `3.0.0`). Its wording has **not yet been run in the playground**.
+`idea_compound` and `hasty_generalisation` ship **disabled**.
+
+To enable a disabled question, set `enabled: true` on its entry in `JEV_REVIEW_QUESTIONS`
+(`src/jev/review-questions.ts`), update the enabled-set snapshot (`npm run test:update`, then review
+the diff), and bump `JEV_QUESTION_SET_VERSION`. To add a question, append an entry with `kind`,
+`polarity` and `enabled: true` once it is playground-validated; set `minSupporting` on entries that
+only make sense with enough supporting statements.
+
+Upgrading from 0.4: `ReviewUnit.claims` and `truncatedClaims` are now `support` (all children, in
+order), `kind: 'nested_claim'` is now `'nested'`, `joinClaimsParagraph` and `minClaims` are removed,
+and `reviewStateKeys` returns the subject key only.
 
 In Deno, use an `npm:` specifier:
 

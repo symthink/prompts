@@ -3,7 +3,6 @@ export { JEV_QUESTION_SET_VERSION } from './version.js';
 export { stripSymthinkGlyphs } from './glyphs.js';
 export {
   buildReviewRequest,
-  joinClaimsParagraph,
   reviewStateKeys,
   type BuildReviewRequestOptions,
 } from './review-request.js';
@@ -12,7 +11,12 @@ export {
   type ReviewQuestionEntry,
   type ReviewStateKeys,
 } from './review-questions.js';
-export { fingerprintReviewUnit, type ReviewNode, type ReviewUnit } from './review-unit.js';
+export {
+  fingerprintReviewUnit,
+  supportingCount,
+  type ReviewNode,
+  type ReviewUnit,
+} from './review-unit.js';
 
 export type {
   ChoiceAnswer,

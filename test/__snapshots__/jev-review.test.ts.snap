@@ -1,0 +1,252 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JEV_REVIEW_QUESTIONS > matches the enabled question set snapshot (wording changes must be deliberate) 1`] = `
+[
+  {
+    "claim": {
+      "criteria": [
+        "The idea is about a different subject than the question",
+        "The idea is on the question's topic but does not propose an answer to it",
+        "The idea proposes an answer to a related question, not the one asked",
+        "The idea proposes a possible answer to the question as asked, or to one part of it",
+      ],
+      "instructions": "How directly does \`claim\` answer \`question\`?",
+      "type": "score",
+    },
+    "idea": {
+      "criteria": [
+        "The idea is about a different subject than the question",
+        "The idea is on the question's topic but does not propose an answer to it",
+        "The idea proposes an answer to a related question, not the one asked",
+        "The idea proposes a possible answer to the question as asked, or to one part of it",
+      ],
+      "instructions": "How directly does \`idea\` answer \`question\`?",
+      "type": "score",
+    },
+    "ideaUnitOnly": true,
+    "key": "answers_question",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "good",
+  },
+  {
+    "claim": {
+      "criteria": [
+        "Every statement is about a different subject than the idea",
+        "The statements repeat the idea or give background on its topic, and none gives a reason to accept it",
+        "The statements back up a fact the idea relies on, such as that a problem exists, but none gives a reason to accept the main thing the idea proposes",
+        "At least one statement gives a reason to accept the main thing the idea proposes",
+      ],
+      "instructions": "How well do the statements in \`support\` work as reasons to accept \`claim\`? Judge the reasoning only, not whether the idea is right. Questions, and statements that argue against the idea, do not count as reasons to accept it.",
+      "type": "score",
+    },
+    "idea": {
+      "criteria": [
+        "Every statement is about a different subject than the idea",
+        "The statements repeat the idea or give background on its topic, and none gives a reason to accept it",
+        "The statements back up a fact the idea relies on, such as that a problem exists, but none gives a reason to accept the main thing the idea proposes",
+        "At least one statement gives a reason to accept the main thing the idea proposes",
+      ],
+      "instructions": "How well do the statements in \`support\` work as reasons to accept \`idea\`? Judge the reasoning only, not whether the idea is right. Questions, and statements that argue against the idea, do not count as reasons to accept it.",
+      "type": "score",
+    },
+    "ideaUnitOnly": false,
+    "key": "support_backs_idea",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "good",
+  },
+  {
+    "claim": {
+      "criteria": [
+        "Too vague to check: it is unclear what observation would count for or against them",
+        "Checkable in principle, but they leave open who, where, when or how much",
+        "At least one is specific enough that a reader can tell what kind of evidence would confirm or contradict it",
+      ],
+      "instructions": "How easy would it be to check the factual statements in \`support\` against evidence? Ignore any that are questions.",
+      "type": "score",
+    },
+    "idea": {
+      "criteria": [
+        "Too vague to check: it is unclear what observation would count for or against them",
+        "Checkable in principle, but they leave open who, where, when or how much",
+        "At least one is specific enough that a reader can tell what kind of evidence would confirm or contradict it",
+      ],
+      "instructions": "How easy would it be to check the factual statements in \`support\` against evidence? Ignore any that are questions.",
+      "type": "score",
+    },
+    "ideaUnitOnly": false,
+    "key": "support_checkable",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "good",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea",
+        "true": "At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it",
+      },
+      "instructions": "Does \`claim\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea",
+        "true": "At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it",
+      },
+      "instructions": "Does \`idea\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "considers_downside",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "good",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "Each statement adds something the others do not",
+        "true": "At least two statements could be merged without losing a reason",
+      },
+      "instructions": "Do two or more statements in \`support\` make the same point in different words?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "Each statement adds something the others do not",
+        "true": "At least two statements could be merged without losing a reason",
+      },
+      "instructions": "Do two or more statements in \`support\` make the same point in different words?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "support_repeats",
+    "kind": "rubric",
+    "minSupporting": 2,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "It asks without taking an answer for granted. A plain factual question counts here",
+        "true": "It takes a conclusion for granted, or uses wording that favours one answer",
+      },
+      "instructions": "Does the wording of \`question\` assume or push a particular answer?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "It asks without taking an answer for granted. A plain factual question counts here",
+        "true": "It takes a conclusion for granted, or uses wording that favours one answer",
+      },
+      "instructions": "Does the wording of \`question\` assume or push a particular answer?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": true,
+    "key": "question_leading",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The wording is neutral about people, even if it criticises an idea, a policy or an institution",
+        "true": "At least one word or phrase insults, mocks or shows contempt for a person or group",
+      },
+      "instructions": "Does \`claim\` or any item in \`support\` use insulting, mocking or contemptuous wording about a person or a group of people?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "The wording is neutral about people, even if it criticises an idea, a policy or an institution",
+        "true": "At least one word or phrase insults, mocks or shows contempt for a person or group",
+      },
+      "instructions": "Does \`idea\` or any item in \`support\` use insulting, mocking or contemptuous wording about a person or a group of people?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "loaded_wording",
+    "kind": "rubric",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "instructions": "Do the statements in \`support\` argue that \`claim\` is right because many people believe or want it?",
+      "type": "noul",
+    },
+    "idea": {
+      "instructions": "Do the statements in \`support\` argue that \`idea\` is right because many people believe or want it?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "appeal_to_popularity",
+    "kind": "fallacy",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "instructions": "Do the statements in \`support\` dismiss a view by attacking the person who holds it instead of the view itself?",
+      "type": "noul",
+    },
+    "idea": {
+      "instructions": "Do the statements in \`support\` dismiss a view by attacking the person who holds it instead of the view itself?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "personal_attack",
+    "kind": "fallacy",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "instructions": "Do the statements in \`support\` present only two options when more exist?",
+      "type": "noul",
+    },
+    "idea": {
+      "instructions": "Do the statements in \`support\` present only two options when more exist?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "false_dilemma",
+    "kind": "fallacy",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "instructions": "Do the statements in \`support\` assume that one step will lead, through further steps, to an extreme outcome without showing why each step follows?",
+      "type": "noul",
+    },
+    "idea": {
+      "instructions": "Do the statements in \`support\` assume that one step will lead, through further steps, to an extreme outcome without showing why each step follows?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "slippery_slope",
+    "kind": "fallacy",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+  {
+    "claim": {
+      "instructions": "Do the statements in \`support\` back \`claim\` only by relying on each other in a circle?",
+      "type": "noul",
+    },
+    "idea": {
+      "instructions": "Do the statements in \`support\` back \`idea\` only by relying on each other in a circle?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "circular_reasoning",
+    "kind": "fallacy",
+    "minSupporting": 0,
+    "polarity": "flag",
+  },
+]
+`;
