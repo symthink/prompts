@@ -30,9 +30,10 @@ export type ReviewQuestionEntry = {
  * Every question is asked once per unit, about the `support` statements taken together. The wording is
  * the merged set from the support-unit review research (jev-questions-v3.json).
  *
- * Playground: NOT YET RUN. Every wording below is unrun, and `idea_compound` and `hasty_generalisation`
- * ship disabled until the playground shows they separate their cases. Fallacy flags still reach authors
- * only when the app's `JEV_FALLACY_FLAGS_ENABLED` is on.
+ * Playground: NOT YET RUN as a whole. Only `considers_downside` (3.1.0) has been run, against every test
+ * case and the scheme-review probe units on jev-1.14.0 (2026-11-24). `idea_compound` and
+ * `hasty_generalisation` ship disabled until the playground shows they separate their cases. Fallacy
+ * flags still reach authors only when the app's `JEV_FALLACY_FLAGS_ENABLED` is on.
  *
  * Wording is matched word for word to the JSON; a snapshot test makes any change deliberate.
  */
@@ -92,13 +93,15 @@ export const JEV_REVIEW_QUESTIONS: readonly ReviewQuestionEntry[] = [
     polarity: 'good',
     kind: 'rubric',
     enabled: true,
+    // 3.1.0: only the subject's own downsides count. The 3.0.0 wording also credited bad outcomes of
+    // rejecting the subject or of an alternative, so an argument made only of the other side's costs
+    // read as having considered a downside.
     question: ({ subject }) => ({
       type: 'noul',
-      instructions: `Does \`${subject}\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?`,
+      instructions: `Does \`${subject}\` or any item in \`support\` mention a cost or risk of what \`${subject}\` proposes, an objection to \`${subject}\`, or a situation in which it would not work or hold? Bad outcomes of rejecting \`${subject}\`, or of an alternative to it, do not count.`,
       criteria: {
-        true: 'At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it',
-        false:
-          'The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea',
+        true: `At least one cost, risk, objection or limiting condition of the ${subject} itself is written out, as a statement or as a question that raises it`,
+        false: `The only bad outcomes mentioned belong to rejecting the ${subject} or to an alternative, or there are none`,
       },
     }),
   },

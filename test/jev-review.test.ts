@@ -365,8 +365,8 @@ describe('stripSymthinkGlyphs', () => {
 });
 
 describe('JEV_QUESTION_SET_VERSION', () => {
-  it('is 3.0.0', () => {
-    expect(JEV_QUESTION_SET_VERSION).toBe('3.0.0');
+  it('is 3.1.0', () => {
+    expect(JEV_QUESTION_SET_VERSION).toBe('3.1.0');
   });
 });
 

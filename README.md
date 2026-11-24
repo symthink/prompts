@@ -138,7 +138,9 @@ are no per-item ids. Each entry's `question` receives the unit's subject key
 - `minSupporting`: skipped when `supportingCount(unit)` is lower (`support_repeats` uses `2`).
 
 The set is the merged question set from the support-unit review research
-(`JEV_QUESTION_SET_VERSION` `3.0.0`). Its wording has **not yet been run in the playground**.
+(`JEV_QUESTION_SET_VERSION` `3.1.0`). Most of its wording has **not yet been run in the playground**.
+The exception is `considers_downside`, reworded in `3.1.0` so that bad outcomes of rejecting the
+subject, or of an alternative, no longer count as a downside, and run against every test case.
 `idea_compound` and `hasty_generalisation` ship **disabled**.
 
 To enable a disabled question, set `enabled: true` on its entry in `JEV_REVIEW_QUESTIONS`

@@ -84,18 +84,18 @@ exports[`JEV_REVIEW_QUESTIONS > matches the enabled question set snapshot (wordi
   {
     "claim": {
       "criteria": {
-        "false": "The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea",
-        "true": "At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it",
+        "false": "The only bad outcomes mentioned belong to rejecting the claim or to an alternative, or there are none",
+        "true": "At least one cost, risk, objection or limiting condition of the claim itself is written out, as a statement or as a question that raises it",
       },
-      "instructions": "Does \`claim\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?",
+      "instructions": "Does \`claim\` or any item in \`support\` mention a cost or risk of what \`claim\` proposes, an objection to \`claim\`, or a situation in which it would not work or hold? Bad outcomes of rejecting \`claim\`, or of an alternative to it, do not count.",
       "type": "noul",
     },
     "idea": {
       "criteria": {
-        "false": "The idea and support present only reasons in favour, background, or questions that raise no doubt about the idea",
-        "true": "At least one cost, risk, objection or limiting condition is written out, as a statement or as a question that raises it",
+        "false": "The only bad outcomes mentioned belong to rejecting the idea or to an alternative, or there are none",
+        "true": "At least one cost, risk, objection or limiting condition of the idea itself is written out, as a statement or as a question that raises it",
       },
-      "instructions": "Does \`idea\` or any item in \`support\` mention a cost, a risk, an objection, or a situation in which the idea would not work?",
+      "instructions": "Does \`idea\` or any item in \`support\` mention a cost or risk of what \`idea\` proposes, an objection to \`idea\`, or a situation in which it would not work or hold? Bad outcomes of rejecting \`idea\`, or of an alternative to it, do not count.",
       "type": "noul",
     },
     "ideaUnitOnly": false,
