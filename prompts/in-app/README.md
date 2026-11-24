@@ -1,7 +1,7 @@
 # In-app prompts
 
 Short, single-purpose model calls that run inside Symthink: rephrasing a node, labelling nodes,
-pulling citation details out of a PDF, and summarizing a legislator's bills. Each one does a
+pulling citation details out of a PDF, commenting on the support under an argument, and summarizing a legislator's bills. Each one does a
 small job and returns structured output for the app to use directly.
 
 ## How these prompts are delivered
@@ -21,6 +21,7 @@ workflow with its own domain language (ballot, civic areas, …), give it its ow
 
 | Id | Title | Delivery | Status | Symthink surface / API |
 |----|-------|----------|--------|------------------------|
+| [`in-app.critical-question-comment`](#critical-question-comment) | Critical-question comment | `symthink-api` | `active` | Review results → opened critical-question note → POST /api/ai/review-comment |
 | [`in-app.labels`](#labels) | Make labels | `symthink-api` | `active` | My Vision → Options → Make labels (`make_labels`) → POST /api/ai/make-labels |
 | [`in-app.pdf-citation`](#pdf-citation) | PDF citation extraction | `symthink-api` | `active` | POST /api/ai/metadata (citation resolver, when the source URL is a PDF) |
 | [`in-app.rephrase`](#rephrase) | Rephrase (single) | `symthink-api` | `reference` | — |
@@ -29,6 +30,25 @@ workflow with its own domain language (ballot, civic areas, …), give it its ow
 | [`in-app.war-summary`](#war-summary) | Weekly legislative activity report | `symthink-api` | `active` | process-war-refresh edge function (weekly summaries on Home → Federal representatives)<br>GET /api/war/prompt (prompt disclosure shown to users)<br>ETL/summarize-legislation.mts |
 
 ## Prompt details
+
+### critical-question-comment
+
+Given one review unit, its argument scheme and the critical questions that fired, returns at most two short questions or prompts the author can act on. Never rewrites the text or judges whether the Idea is right.
+
+- **Id:** `in-app.critical-question-comment`
+- **Template:** [`system.md`](./critical-question-comment/system.md), [`user.md`](./critical-question-comment/user.md) · [`meta.json`](./critical-question-comment/meta.json)
+- **Output:** `system_user` (returns `{ system, user }`)
+- **Paste-back into Symthink:** no
+- **Wired in Symthink from this package:** yes
+
+| Variable | Type | Required | Description |
+|----------|------|----------|-------------|
+| `question` | `string` | yes | Text of the Question the unit answers. |
+| `subjectKind` | `"idea" \| "claim"` | yes | Whether the subject is an Idea or a Claim. |
+| `subject` | `string` | yes | Text of the Idea or Claim being supported. |
+| `support` | `string[]` | yes | The supporting statements, in the author's order (at least one). |
+| `scheme` | `"consequences" \| "expert_opinion"` | yes | The argument scheme the review found in the support. |
+| `checks` | `{ key: string, question: string, kind: "burden" \| "rebuttal" }[]` | yes | One or two critical questions that fired, highest weakness first: the review key, its wording and whether it shifts proof onto the support (burden) or invites an objection (rebuttal). |
 
 ### labels
 

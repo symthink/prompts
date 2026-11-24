@@ -23,6 +23,10 @@ import {
   synthesisOutputSchema,
   type SynthesisOutput,
 } from '../schemas/civic-listening/synthesis.js';
+import {
+  criticalQuestionCommentOutputSchema,
+  type CriticalQuestionCommentOutput,
+} from '../schemas/in-app/critical-question-comment.js';
 import { labelsOutputSchema, type LabelsOutput } from '../schemas/in-app/labels.js';
 import { pdfCitationOutputSchema, type PdfCitationOutput } from '../schemas/in-app/pdf-citation.js';
 import {
@@ -38,6 +42,7 @@ export const outputSchemasByPromptId = {
   'civic-areas.orientation': orientationOutputSchema,
   'civic-areas.orientation-repair': orientationRepairOutputSchema,
   'civic-listening.synthesis': synthesisOutputSchema,
+  'in-app.critical-question-comment': criticalQuestionCommentOutputSchema,
   'in-app.labels': labelsOutputSchema,
   'in-app.pdf-citation': pdfCitationOutputSchema,
   'in-app.rephrase-options': rephraseOptionsOutputSchema,
@@ -48,6 +53,7 @@ export type JsonPromptWithOutputSchema = keyof typeof outputSchemasByPromptId;
 
 export type {
   BallotSourceOutput,
+  CriticalQuestionCommentOutput,
   LabelsOutput,
   OrientationOutput,
   OrientationRepairOutput,
@@ -62,6 +68,7 @@ export type {
 
 export {
   ballotSourceOutputSchema,
+  criticalQuestionCommentOutputSchema,
   labelsOutputSchema,
   orientationOutputSchema,
   orientationRepairOutputSchema,

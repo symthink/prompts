@@ -1,0 +1,13 @@
+Question: How many eggs is it healthy to eat in a week?
+
+Idea: Eating an egg every day is fine for most adults.
+
+Support:
+1. A fitness influencer I follow says she eats three eggs every morning and her cholesterol is great.
+2. My dentist friend told me eggs are completely safe.
+
+Scheme: argument from an expert's opinion
+
+Critical questions that fired (highest weakness first):
+- (burden) Is it unclear whether a source cited in the support is a credible expert?
+- (burden) Is the expertise of a source cited in the support in a different field from the claim?

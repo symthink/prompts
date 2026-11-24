@@ -1,0 +1,21 @@
+{
+  "question": "Should Maple Falls allow food trucks downtown?",
+  "subjectKind": "idea",
+  "subject": "Maple Falls should ban food trucks downtown.",
+  "support": [
+    "If a few food trucks are allowed, soon the whole street will be lined with them and the sit-down restaurants will close."
+  ],
+  "scheme": "consequences",
+  "checks": [
+    {
+      "key": "cq_cons_evidence",
+      "question": "Is a predicted outcome in the support asserted without any evidence or example?",
+      "kind": "burden"
+    },
+    {
+      "key": "cq_cons_likely",
+      "question": "Is a predicted outcome in the support unlikely, or only loosely connected to the action in the Idea?",
+      "kind": "burden"
+    }
+  ]
+}

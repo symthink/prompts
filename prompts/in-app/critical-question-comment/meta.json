@@ -1,0 +1,58 @@
+{
+  "id": "in-app.critical-question-comment",
+  "title": "Critical-question comment",
+  "description": "Given one review unit, its argument scheme and the critical questions that fired, returns at most two short questions or prompts the author can act on. Never rewrites the text or judges whether the Idea is right.",
+  "delivery": "symthink-api",
+  "output": "system_user",
+  "outputFormat": "json",
+  "requires": [],
+  "outputSchema": true,
+  "variables": [
+    {
+      "name": "question",
+      "type": "string",
+      "required": true,
+      "description": "Text of the Question the unit answers."
+    },
+    {
+      "name": "subjectKind",
+      "type": "\"idea\" | \"claim\"",
+      "required": true,
+      "description": "Whether the subject is an Idea or a Claim."
+    },
+    {
+      "name": "subject",
+      "type": "string",
+      "required": true,
+      "description": "Text of the Idea or Claim being supported."
+    },
+    {
+      "name": "support",
+      "type": "string[]",
+      "required": true,
+      "description": "The supporting statements, in the author's order (at least one)."
+    },
+    {
+      "name": "scheme",
+      "type": "\"consequences\" | \"expert_opinion\"",
+      "required": true,
+      "description": "The argument scheme the review found in the support."
+    },
+    {
+      "name": "checks",
+      "type": "{ key: string, question: string, kind: \"burden\" | \"rebuttal\" }[]",
+      "required": true,
+      "description": "One or two critical questions that fired, highest weakness first: the review key, its wording and whether it shifts proof onto the support (burden) or invites an objection (rebuttal)."
+    }
+  ],
+  "usage": {
+    "status": "active",
+    "symthink": {
+      "wired": true,
+      "surfaces": [
+        "Review results → opened critical-question note → POST /api/ai/review-comment"
+      ]
+    },
+    "pasteBack": false
+  }
+}

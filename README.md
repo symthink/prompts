@@ -24,7 +24,7 @@ their variables, and how Symthink uses them today.
 | [`articles`](prompts/articles/README.md) | Review a reasoning branch, then draft an evidence-aware article from it |
 | [`civic-areas`](prompts/civic-areas/README.md) | Explain one civic geographic scope: powers, decision-makers, participation |
 | [`civic-listening`](prompts/civic-listening/README.md) | Group anonymous community submissions into themes |
-| [`in-app`](prompts/in-app/README.md) | Small in-app model calls: rephrase, labels, PDF citations, legislative summaries |
+| [`in-app`](prompts/in-app/README.md) | Small in-app model calls: rephrase, labels, critical-question comments, PDF citations, legislative summaries |
 | [`_partials`](prompts/_partials/README.md) | Shared prose included by several prompts |
 
 Each prompt lives in `prompts/<domain>/<slug>/` and has the id `<domain>.<slug>`, for example
@@ -310,6 +310,7 @@ from the same module.
 | `civic-areas.orientation` | `single` | `renderCivicAreaOrientation` | `OrientationVars` |
 | `civic-areas.orientation-repair` | `single` | `renderCivicAreaOrientationRepair` | `OrientationRepairVars` |
 | `civic-listening.synthesis` | `system_user` | `renderCivicListeningSynthesis` | `SynthesisVars` |
+| `in-app.critical-question-comment` | `system_user` | `renderCriticalQuestionComment` | `CriticalQuestionCommentVars` |
 | `in-app.labels` | `system_user` | `renderLabels` | `LabelsVars` |
 | `in-app.pdf-citation` | `system_user` | `renderPdfCitation` | `PdfCitationVars` |
 | `in-app.rephrase` | `system_user` | `renderRephrase` | `RephraseVars` |

@@ -1,0 +1,22 @@
+{
+  "question": "How many eggs is it healthy to eat in a week?",
+  "subjectKind": "idea",
+  "subject": "Eating an egg every day is fine for most adults.",
+  "support": [
+    "A fitness influencer I follow says she eats three eggs every morning and her cholesterol is great.",
+    "My dentist friend told me eggs are completely safe."
+  ],
+  "scheme": "expert_opinion",
+  "checks": [
+    {
+      "key": "cq_exp_expertise",
+      "question": "Is it unclear whether a source cited in the support is a credible expert?",
+      "kind": "burden"
+    },
+    {
+      "key": "cq_exp_field",
+      "question": "Is the expertise of a source cited in the support in a different field from the claim?",
+      "kind": "burden"
+    }
+  ]
+}

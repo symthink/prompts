@@ -35,6 +35,12 @@ import {
 } from '../schemas/civic-listening/synthesis.js';
 import { labels, labelsOutputSchema, type LabelsOutput, type LabelsVars } from '../schemas/in-app/labels.js';
 import {
+  criticalQuestionComment,
+  criticalQuestionCommentOutputSchema,
+  type CriticalQuestionCommentOutput,
+  type CriticalQuestionCommentVars,
+} from '../schemas/in-app/critical-question-comment.js';
+import {
   pdfCitation,
   pdfCitationOutputSchema,
   type PdfCitationOutput,
@@ -61,6 +67,7 @@ export const symthinkApiPrompts = {
   'civic-areas.orientation': orientation,
   'civic-areas.orientation-repair': orientationRepair,
   'civic-listening.synthesis': synthesis,
+  'in-app.critical-question-comment': criticalQuestionComment,
   'in-app.labels': labels,
   'in-app.pdf-citation': pdfCitation,
   'in-app.rephrase': rephrase,
@@ -91,6 +98,8 @@ export const renderCivicAreaOrientationRepair = (vars: OrientationRepairVars = {
   renderPrompt('civic-areas.orientation-repair', vars);
 export const renderCivicListeningSynthesis = (vars: SynthesisVars) =>
   renderPrompt('civic-listening.synthesis', vars);
+export const renderCriticalQuestionComment = (vars: CriticalQuestionCommentVars) =>
+  renderPrompt('in-app.critical-question-comment', vars);
 export const renderLabels = (vars: LabelsVars) => renderPrompt('in-app.labels', vars);
 export const renderPdfCitation = (vars: PdfCitationVars) => renderPrompt('in-app.pdf-citation', vars);
 export const renderRephrase = (vars: RephraseVars) => renderPrompt('in-app.rephrase', vars);
@@ -100,6 +109,8 @@ export const renderWarSummary = (vars: WarSummaryVars) => renderPrompt('in-app.w
 
 export type {
   BallotSourceOutput,
+  CriticalQuestionCommentOutput,
+  CriticalQuestionCommentVars,
   LabelsOutput,
   LabelsVars,
   OrientationOutput,
@@ -124,6 +135,7 @@ export type {
 };
 export {
   ballotSourceOutputSchema,
+  criticalQuestionCommentOutputSchema,
   labelsOutputSchema,
   orientationOutputSchema,
   orientationRepairOutputSchema,
