@@ -1,2 +1,2 @@
 /** Bump when any Jev question wording in `src/jev/` changes. */
-export const JEV_QUESTION_SET_VERSION = '3.1.0';
+export const JEV_QUESTION_SET_VERSION = '3.2.0';

@@ -99,7 +99,7 @@ import {
 const tagRequest = buildCertaintyRequest('Later bus service would probably reduce drunk driving downtown.');
 const typeInt = typeIntFromCertaintyScore(0.89); // 5
 
-const reviewRequest = buildReviewRequest(unit, { includeFallacies: true });
+const reviewRequest = buildReviewRequest(unit, { includeFallacies: true, includeScheme: true });
 const fingerprint = fingerprintReviewUnit(unit);
 ```
 
@@ -109,10 +109,13 @@ question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`).
 A review unit is one Idea or Claim and its **support**: the statements, Questions and other children
 directly under it. `ReviewUnit` is
 `{ nodeId, kind: 'idea' | 'nested', question: { text }, context: { text }[], subject, support }`,
-where `subject` and each `support` item are `ReviewNode`s (`{ id, text, label, typeInt, sources }`).
+plus an optional `conclusion?: ReviewNode`, where `subject`, `conclusion` and each `support` item are
+`ReviewNode`s (`{ id, text, label, typeInt, sources }`).
 `idea` is an Idea directly under a Question; `nested` is an Idea or Claim reached further down.
+`conclusion` is the ∴ line of an Argument-style unit, which is left out of `support`.
 `fingerprintReviewUnit(unit)` hashes the Question text, the context texts, the subject and every
-`support` item (text, label, `typeInt`, sources) in order, and `supportingCount(unit)` counts the
+`support` item (text, label, `typeInt`, sources) in order, plus `conclusion` **only when the unit has
+one**, so a unit without a ∴ line keeps the fingerprint it had in 3.1.0. `supportingCount(unit)` counts the
 `support` items outside the Question band (`typeInt` 0-3).
 
 `buildReviewRequest` sends the support as an **array of strings**, in order, with empty items
@@ -120,6 +123,8 @@ dropped, and every question is asked once against the statements taken together.
 replaced in every text:
 
 - Idea unit: `{ question, idea, support }`
+- Any unit with a `conclusion` whose text is not empty also gets `conclusion`, whatever `includeScheme`
+  is.
 - Nested unit: `{ question, context?, idea | claim, support }`, where the subject sits under `idea`
   when its `typeInt` is 4-6 and `claim` otherwise, and `context` (the texts between the Question and
   the subject) is sent only when it is not empty. In nested units `question` and `context` are
@@ -130,15 +135,33 @@ are no per-item ids. Each entry's `question` receives the unit's subject key
 (`reviewStateKeys(unit)`), so its wording names `idea` or `claim` as appropriate. Entries carry:
 
 - `polarity`: `flag` when yes is the problem (`support_repeats`, `question_leading`,
-  `loaded_wording`, `idea_compound`, every fallacy), `good` when no is (or a low score).
-- `kind`: `rubric` or `fallacy`. `buildReviewRequest(unit, { includeFallacies: false })` skips
-  fallacies.
+  `loaded_wording`, `idea_compound`, every fallacy), `good` when no is (or a low score), `none` when
+  the answer is a reading rather than a verdict (Choice entries and `scheme_fits`).
+- `kind`: `rubric`, `fallacy`, `scheme`, `structure` or `critical`.
+  `buildReviewRequest(unit, { includeFallacies: false })` skips fallacies, and entries of kind `scheme`,
+  `structure` and `critical` are sent **only** with `{ includeScheme: true }` (default `false`, so a
+  request built with default options has exactly the 3.1.0 question keys).
 - `enabled`: disabled entries are never sent.
 - `ideaUnitOnly`: skipped in `nested` units (`answers_question`, `question_leading`).
-- `minSupporting`: skipped when `supportingCount(unit)` is lower (`support_repeats` uses `2`).
+- `minSupporting`: skipped when `supportingCount(unit)` is lower (`support_repeats`, `structure` and
+  `support_ordered` use `2`).
+- `requiresConclusion`: skipped when the unit has no `conclusion` (`conclusion_restates`).
+- `scheme` and `cq` (critical entries): the scheme the question belongs to (`consequences`,
+  `cause_to_effect` or `expert_opinion`) and whether it puts the burden on the author's support
+  (`burden`) or invites a rebuttal (`rebuttal`).
+- `logOnly`: the answer is stored in `argument_reviews.answers` but never shown to the author
+  (`cq_cons_value`).
+
+**Scheme-aware questions (3.2.0).** With `includeScheme: true` the one request also asks, after the
+fallacies: `scheme` (Choice: `consequences`, `cause_to_effect`, `expert_opinion`) and `scheme_fits`;
+`structure` (Choice: `convergent`, `linked`, `serial`, `mixed`), `support_ordered` and
+`conclusion_restates`; and ten critical questions (`cq_cons_*`, `cq_cause_*`, `cq_exp_*`) for the three
+schemes. Everything comes back in the same answers blob; there is no separate classification request.
+The wording was probed against Jev on 2026-11-24 (22 units, see the scheme-aware review research) and
+has not had a labelled run.
 
 The set is the merged question set from the support-unit review research
-(`JEV_QUESTION_SET_VERSION` `3.1.0`). Most of its wording has **not yet been run in the playground**.
+(`JEV_QUESTION_SET_VERSION` `3.2.0`). Most of its wording has **not yet been run in the playground**.
 The exception is `considers_downside`, reworded in `3.1.0` so that bad outcomes of rejecting the
 subject, or of an alternative, no longer count as a downside, and run against every test case.
 `idea_compound` and `hasty_generalisation` ship **disabled**.

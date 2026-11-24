@@ -248,5 +248,378 @@ exports[`JEV_REVIEW_QUESTIONS > matches the enabled question set snapshot (wordi
     "minSupporting": 0,
     "polarity": "flag",
   },
+  {
+    "claim": {
+      "criteria": {
+        "cause_to_effect": "They argue that something did cause, or will cause, a particular effect, as a matter of fact rather than as a reason to act",
+        "consequences": "They argue for or against an action or policy by its likely good or bad outcomes",
+        "expert_opinion": "They rely mainly on what an expert, scientist, official or authoritative source says",
+      },
+      "instructions": "Which pattern of reasoning do the statements in \`support\` mainly use to back \`claim\`?",
+      "type": "choice",
+    },
+    "idea": {
+      "criteria": {
+        "cause_to_effect": "They argue that something did cause, or will cause, a particular effect, as a matter of fact rather than as a reason to act",
+        "consequences": "They argue for or against an action or policy by its likely good or bad outcomes",
+        "expert_opinion": "They rely mainly on what an expert, scientist, official or authoritative source says",
+      },
+      "instructions": "Which pattern of reasoning do the statements in \`support\` mainly use to back \`idea\`?",
+      "type": "choice",
+    },
+    "ideaUnitOnly": false,
+    "key": "scheme",
+    "kind": "scheme",
+    "minSupporting": 0,
+    "polarity": "none",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The support mainly relies on something else, such as a rule, a value, a comparison, examples, a sequence of steps or a description",
+        "true": "Most of the support is one of these three patterns",
+      },
+      "instructions": "Do the statements in \`support\` mainly rely on one of these patterns: the likely outcomes of an action, a cause and its effect, or what an expert or authority says?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "The support mainly relies on something else, such as a rule, a value, a comparison, examples, a sequence of steps or a description",
+        "true": "Most of the support is one of these three patterns",
+      },
+      "instructions": "Do the statements in \`support\` mainly rely on one of these patterns: the likely outcomes of an action, a cause and its effect, or what an expert or authority says?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "scheme_fits",
+    "kind": "scheme",
+    "minSupporting": 0,
+    "polarity": "none",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "convergent": "Each statement gives a separate reason for the claim. Removing one weakens the case, but the rest still support it",
+        "linked": "The statements support the claim only in combination. If one is false or removed, the others no longer support it",
+        "mixed": "Some statements support the claim separately and others only in combination or in a chain",
+        "serial": "One statement mainly backs another statement, which in turn backs the claim",
+      },
+      "instructions": "How do the statements in \`support\` work together to back \`claim\`?",
+      "type": "choice",
+    },
+    "idea": {
+      "criteria": {
+        "convergent": "Each statement gives a separate reason for the idea. Removing one weakens the case, but the rest still support it",
+        "linked": "The statements support the idea only in combination. If one is false or removed, the others no longer support it",
+        "mixed": "Some statements support the idea separately and others only in combination or in a chain",
+        "serial": "One statement mainly backs another statement, which in turn backs the idea",
+      },
+      "instructions": "How do the statements in \`support\` work together to back \`idea\`?",
+      "type": "choice",
+    },
+    "ideaUnitOnly": false,
+    "key": "structure",
+    "kind": "structure",
+    "minSupporting": 2,
+    "polarity": "none",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The statements could be listed in any order without changing what they say",
+        "true": "Reordering the statements would change or lose their meaning",
+      },
+      "instructions": "Do the statements in \`support\` describe steps, events in sequence, or a ranking, so that their order matters?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "The statements could be listed in any order without changing what they say",
+        "true": "Reordering the statements would change or lose their meaning",
+      },
+      "instructions": "Do the statements in \`support\` describe steps, events in sequence, or a ranking, so that their order matters?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "support_ordered",
+    "kind": "structure",
+    "minSupporting": 2,
+    "polarity": "none",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The conclusion states something the claim does not, such as what the statements add up to or a narrower claim",
+        "true": "The conclusion repeats the claim, in the same or different words, and adds nothing",
+      },
+      "instructions": "Does \`conclusion\` say the same thing as \`claim\`?",
+      "type": "noul",
+    },
+    "idea": {
+      "criteria": {
+        "false": "The conclusion states something the idea does not, such as what the statements add up to or a narrower claim",
+        "true": "The conclusion repeats the idea, in the same or different words, and adds nothing",
+      },
+      "instructions": "Does \`conclusion\` say the same thing as \`idea\`?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "conclusion_restates",
+    "kind": "structure",
+    "minSupporting": 0,
+    "polarity": "none",
+    "requiresConclusion": true,
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The outcome follows plausibly and directly from the action, or no outcome is predicted",
+        "true": "The outcome would need several further steps or unstated assumptions to follow from the action",
+      },
+      "instructions": "Is a predicted outcome in \`support\` unlikely, or only loosely connected to the action in \`claim\`?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "The outcome follows plausibly and directly from the action, or no outcome is predicted",
+        "true": "The outcome would need several further steps or unstated assumptions to follow from the action",
+      },
+      "instructions": "Is a predicted outcome in \`support\` unlikely, or only loosely connected to the action in \`idea\`?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cons_likely",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "consequences",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "At least one statement gives evidence, data or an example that the outcome would happen, or no outcome is predicted",
+        "true": "The outcome is stated with nothing that shows it would happen",
+      },
+      "instructions": "Is a predicted outcome in \`support\` asserted without any evidence or example?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "At least one statement gives evidence, data or an example that the outcome would happen, or no outcome is predicted",
+        "true": "The outcome is stated with nothing that shows it would happen",
+      },
+      "instructions": "Is a predicted outcome in \`support\` asserted without any evidence or example?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cons_evidence",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "consequences",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "Almost everyone would agree whether the outcome is good or bad, or no outcome is described",
+        "true": "Whether the outcome is good depends on values or on which group is affected",
+      },
+      "instructions": "Could reasonable people disagree about whether the outcome described in \`support\` is good or bad, or about who it is good for?",
+      "type": "noul",
+    },
+    "cq": "rebuttal",
+    "idea": {
+      "criteria": {
+        "false": "Almost everyone would agree whether the outcome is good or bad, or no outcome is described",
+        "true": "Whether the outcome is good depends on values or on which group is affected",
+      },
+      "instructions": "Could reasonable people disagree about whether the outcome described in \`support\` is good or bad, or about who it is good for?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cons_value",
+    "kind": "critical",
+    "logOnly": true,
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "consequences",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The statements give more than timing, such as a comparison, a mechanism or a ruled-out alternative",
+        "true": "Nothing beyond timing or co-occurrence links the cause to the effect",
+      },
+      "instructions": "Is the only evidence for the causal link in \`support\` that the two things happened together, or at about the same time?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "The statements give more than timing, such as a comparison, a mechanism or a ruled-out alternative",
+        "true": "Nothing beyond timing or co-occurrence links the cause to the effect",
+      },
+      "instructions": "Is the only evidence for the causal link in \`support\` that the two things happened together, or at about the same time?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cause_timing_only",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "cause_to_effect",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "Evidence for the causal link is given, or no causal link is claimed",
+        "true": "A cause is named with nothing that shows it produces the effect",
+      },
+      "instructions": "Is a causal link in \`claim\` or \`support\` asserted without any evidence?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "Evidence for the causal link is given, or no causal link is claimed",
+        "true": "A cause is named with nothing that shows it produces the effect",
+      },
+      "instructions": "Is a causal link in \`idea\` or \`support\` asserted without any evidence?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cause_evidence",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "cause_to_effect",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The statements only show the cause and effect occurring together",
+        "true": "At least one statement deals with a rival explanation or compares with a case without the cause",
+      },
+      "instructions": "Do the statements in \`support\` address another likely explanation for the effect, for example by comparing with a case where the claimed cause was absent?",
+      "type": "noul",
+    },
+    "cq": "rebuttal",
+    "idea": {
+      "criteria": {
+        "false": "The statements only show the cause and effect occurring together",
+        "true": "At least one statement deals with a rival explanation or compares with a case without the cause",
+      },
+      "instructions": "Do the statements in \`support\` address another likely explanation for the effect, for example by comparing with a case where the claimed cause was absent?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_cause_rival_addressed",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "good",
+    "scheme": "cause_to_effect",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The source is a named, recognised authority, or no source is cited",
+        "true": "The source is unnamed, vague, or not shown to have relevant knowledge",
+      },
+      "instructions": "Is it unclear whether a source cited in \`support\` is a credible expert?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "The source is a named, recognised authority, or no source is cited",
+        "true": "The source is unnamed, vague, or not shown to have relevant knowledge",
+      },
+      "instructions": "Is it unclear whether a source cited in \`support\` is a credible expert?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_exp_expertise",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "expert_opinion",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The source's expertise matches the claim, or no source is cited",
+        "true": "The source's expertise is in an unrelated field",
+      },
+      "instructions": "Is the expertise of a source cited in \`support\` in a different field from the claim in \`claim\`?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "The source's expertise matches the claim, or no source is cited",
+        "true": "The source's expertise is in an unrelated field",
+      },
+      "instructions": "Is the expertise of a source cited in \`support\` in a different field from the claim in \`idea\`?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_exp_field",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "expert_opinion",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "The claim stays within what the source said, or no source is cited",
+        "true": "The claim goes further than what the source said",
+      },
+      "instructions": "Does \`claim\` claim more than a source in \`support\` is reported to have said?",
+      "type": "noul",
+    },
+    "cq": "burden",
+    "idea": {
+      "criteria": {
+        "false": "The idea stays within what the source said, or no source is cited",
+        "true": "The idea goes further than what the source said",
+      },
+      "instructions": "Does \`idea\` claim more than a source in \`support\` is reported to have said?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_exp_opinion",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "expert_opinion",
+  },
+  {
+    "claim": {
+      "criteria": {
+        "false": "No such reason is apparent, or no source is cited",
+        "true": "The source stands to gain from the claim, or is known to favour one side",
+      },
+      "instructions": "Is there an obvious reason to think a source cited in \`support\` is biased or has a conflict of interest?",
+      "type": "noul",
+    },
+    "cq": "rebuttal",
+    "idea": {
+      "criteria": {
+        "false": "No such reason is apparent, or no source is cited",
+        "true": "The source stands to gain from the claim, or is known to favour one side",
+      },
+      "instructions": "Is there an obvious reason to think a source cited in \`support\` is biased or has a conflict of interest?",
+      "type": "noul",
+    },
+    "ideaUnitOnly": false,
+    "key": "cq_exp_trust",
+    "kind": "critical",
+    "minSupporting": 0,
+    "polarity": "flag",
+    "scheme": "expert_opinion",
+  },
 ]
 `;

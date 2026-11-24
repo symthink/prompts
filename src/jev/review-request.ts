@@ -4,13 +4,21 @@ import { stripSymthinkGlyphs } from './glyphs.js';
 import {
   JEV_REVIEW_QUESTIONS,
   type ReviewQuestionEntry,
+  type ReviewQuestionKind,
   type ReviewStateKeys,
 } from './review-questions.js';
 import { supportingCount, type ReviewUnit } from './review-unit.js';
 
 export type BuildReviewRequestOptions = {
   includeFallacies?: boolean;
+  /**
+   * Ask the scheme, structure and critical questions (set 3.2.0). Defaults to `false`, so a request
+   * built without it has exactly the 3.1.0 question keys.
+   */
+  includeScheme?: boolean;
 };
+
+const SCHEME_KINDS: ReadonlySet<ReviewQuestionKind> = new Set(['scheme', 'structure', 'critical']);
 
 function resolveQuestion(entry: ReviewQuestionEntry, keys: ReviewStateKeys): DecisionQuestion {
   const question = entry.question;
@@ -32,7 +40,7 @@ export function buildReviewRequest(
   unit: ReviewUnit,
   options: BuildReviewRequestOptions = {},
 ): DecisionPrompt {
-  const { includeFallacies = true } = options;
+  const { includeFallacies = true, includeScheme = false } = options;
   const keys = reviewStateKeys(unit);
 
   const state: Record<string, unknown> = {
@@ -47,6 +55,11 @@ export function buildReviewRequest(
     state.context = unit.context.map((item) => stripSymthinkGlyphs(item.text));
   }
 
+  // The ∴ line is sent whenever the unit has one, whether or not the scheme questions are asked.
+  const conclusionText = unit.conclusion ? stripSymthinkGlyphs(unit.conclusion.text).trim() : '';
+  const hasConclusion = conclusionText.length > 0;
+  if (hasConclusion) state.conclusion = conclusionText;
+
   const supporting = supportingCount(unit);
   const questions: Record<string, DecisionQuestion> = {};
 
@@ -54,6 +67,8 @@ export function buildReviewRequest(
     if (!entry.enabled) continue;
     if (entry.kind === 'fallacy' && !includeFallacies) continue;
     if (entry.ideaUnitOnly && unit.kind !== 'idea') continue;
+    if (SCHEME_KINDS.has(entry.kind) && !includeScheme) continue;
+    if (entry.requiresConclusion && !hasConclusion) continue;
     if (entry.minSupporting !== undefined && supporting < entry.minSupporting) continue;
     questions[entry.key] = resolveQuestion(entry, keys);
   }

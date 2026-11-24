@@ -80,6 +80,46 @@ const NESTED_IDEA_UNIT: ReviewUnit = {
   subject: node('nested-idea', 'Add a late-night shuttle from the bars to the transit hub.', 5, 'Idea'),
 };
 
+const CONCLUSION_UNIT: ReviewUnit = {
+  ...IDEA_UNIT,
+  nodeId: 'idea-argument',
+  support: IDEA_UNIT.support.slice(0, 2),
+  conclusion: node('concl', 'So later buses would cut drunk driving downtown.💡', 8),
+};
+
+const V3_1_KEYS = [
+  'answers_question',
+  'support_backs_idea',
+  'support_checkable',
+  'considers_downside',
+  'support_repeats',
+  'question_leading',
+  'loaded_wording',
+  'appeal_to_popularity',
+  'personal_attack',
+  'false_dilemma',
+  'slippery_slope',
+  'circular_reasoning',
+];
+
+const SCHEME_KEYS = [
+  'scheme',
+  'scheme_fits',
+  'structure',
+  'support_ordered',
+  'conclusion_restates',
+  'cq_cons_likely',
+  'cq_cons_evidence',
+  'cq_cons_value',
+  'cq_cause_timing_only',
+  'cq_cause_evidence',
+  'cq_cause_rival_addressed',
+  'cq_exp_expertise',
+  'cq_exp_field',
+  'cq_exp_opinion',
+  'cq_exp_trust',
+];
+
 describe('supportingCount', () => {
   it('counts support items outside the Question band (typeInt 0-3)', () => {
     expect(supportingCount(STATE_EXAMPLE_UNIT)).toBe(2);
@@ -171,6 +211,26 @@ describe('fingerprintReviewUnit', () => {
     ).not.toBe(base);
   });
 
+  it('keeps the 3.1.0 fingerprint for a unit without a conclusion', () => {
+    // Hash computed with the 3.1.0 code, before `conclusion` existed.
+    const unit: ReviewUnit = { ...IDEA_UNIT, support: IDEA_UNIT.support.slice(0, 2) };
+    expect(fingerprintReviewUnit(unit)).toBe('15bac7b1696acd');
+  });
+
+  it('adds the conclusion to the fingerprint when present, and changes when it is edited', () => {
+    const without: ReviewUnit = { ...IDEA_UNIT, support: IDEA_UNIT.support.slice(0, 2) };
+    const withConclusion = fingerprintReviewUnit(CONCLUSION_UNIT);
+    expect(withConclusion).not.toBe(fingerprintReviewUnit(without));
+    const edited: ReviewUnit = {
+      ...CONCLUSION_UNIT,
+      conclusion: { ...CONCLUSION_UNIT.conclusion!, text: 'Different conclusion.' },
+    };
+    expect(fingerprintReviewUnit(edited)).not.toBe(withConclusion);
+    expect(fingerprintReviewUnit({ ...CONCLUSION_UNIT, conclusion: undefined })).toBe(
+      fingerprintReviewUnit(without),
+    );
+  });
+
   it('ignores fields outside the fingerprint shape', () => {
     const withMeta: ReviewUnit = {
       ...IDEA_UNIT,
@@ -214,6 +274,88 @@ describe('buildReviewRequest', () => {
       ].sort(),
     );
     expect(Object.keys(questions).some((key) => /_c\d+$/.test(key))).toBe(false);
+  });
+
+  it('has exactly the 3.1.0 question keys with default options', () => {
+    for (const unit of [IDEA_UNIT, CONCLUSION_UNIT]) {
+      const { questions } = buildReviewRequest(unit);
+      expect(Object.keys(questions).sort()).toEqual([...V3_1_KEYS].sort());
+      expect(Object.keys(buildReviewRequest(unit, { includeScheme: false }).questions).sort()).toEqual(
+        [...V3_1_KEYS].sort(),
+      );
+    }
+  });
+
+  it('adds every scheme key but conclusion_restates with includeScheme and no conclusion', () => {
+    const { questions, state } = buildReviewRequest(IDEA_UNIT, { includeScheme: true });
+    expect(supportingCount(IDEA_UNIT)).toBe(4);
+    expect(Object.keys(questions).sort()).toEqual(
+      [...V3_1_KEYS, ...SCHEME_KEYS.filter((key) => key !== 'conclusion_restates')].sort(),
+    );
+    expect(state).not.toHaveProperty('conclusion');
+  });
+
+  it('skips structure and support_ordered with a single supporting statement', () => {
+    const one: ReviewUnit = { ...IDEA_UNIT, support: [IDEA_UNIT.support[0]!] };
+    const { questions } = buildReviewRequest(one, { includeScheme: true });
+    expect(questions.structure).toBeUndefined();
+    expect(questions.support_ordered).toBeUndefined();
+    expect(questions.scheme).toBeDefined();
+    expect(questions.scheme_fits).toBeDefined();
+    expect(questions.cq_cons_likely).toBeDefined();
+  });
+
+  it('sends conclusion_restates and the conclusion state key for a unit with a conclusion', () => {
+    const { questions, state } = buildReviewRequest(CONCLUSION_UNIT, { includeScheme: true });
+    expect(Object.keys(questions).sort()).toEqual([...V3_1_KEYS, ...SCHEME_KEYS].sort());
+    expect(state).toHaveProperty('conclusion', 'So later buses would cut drunk driving downtown.');
+    expect(questions.conclusion_restates?.instructions).toBe(
+      'Does `conclusion` say the same thing as `idea`?',
+    );
+  });
+
+  it('sends the conclusion state key whatever includeScheme is, and skips an empty one', () => {
+    const plain = buildReviewRequest(CONCLUSION_UNIT);
+    expect(plain.state).toHaveProperty('conclusion', 'So later buses would cut drunk driving downtown.');
+    expect(Object.keys(plain.questions)).not.toContain('conclusion_restates');
+
+    const blank: ReviewUnit = { ...CONCLUSION_UNIT, conclusion: node('concl', '  💡 ', 8) };
+    const glyphOnly = buildReviewRequest(blank, { includeScheme: true });
+    const emptyText: ReviewUnit = { ...CONCLUSION_UNIT, conclusion: node('concl', '   ', 8) };
+    const empty = buildReviewRequest(emptyText, { includeScheme: true });
+    expect(empty.state).not.toHaveProperty('conclusion');
+    expect(empty.questions.conclusion_restates).toBeUndefined();
+    expect(glyphOnly.state).toHaveProperty('conclusion');
+  });
+
+  it('names claim, not idea, in scheme wording for a nested Claim unit', () => {
+    const { questions, state } = buildReviewRequest(NESTED_CLAIM_UNIT, { includeScheme: true });
+    expect(questions.scheme?.instructions).toBe(
+      'Which pattern of reasoning do the statements in `support` mainly use to back `claim`?',
+    );
+    expect(questions.structure?.instructions).toContain('back `claim`?');
+    expect(questions.cq_cause_evidence?.instructions).toContain('in `claim` or `support`');
+    expect(questions.structure).toMatchObject({
+      type: 'choice',
+      criteria: { linked: expect.stringContaining('support the claim only in combination') },
+    });
+    for (const [id, question] of Object.entries(questions)) {
+      expect(question.instructions, id).not.toContain('`idea`');
+      for (const [, key] of question.instructions.matchAll(/`([a-z_]+)`/g)) {
+        expect(state, `${id} names ${key}`).toHaveProperty(key!);
+      }
+    }
+  });
+
+  it('only names keys that exist in the state with includeScheme', () => {
+    for (const unit of [IDEA_UNIT, CONCLUSION_UNIT, NESTED_IDEA_UNIT]) {
+      const { state, questions } = buildReviewRequest(unit, { includeScheme: true });
+      for (const [id, question] of Object.entries(questions)) {
+        for (const [, key] of question.instructions.matchAll(/`([a-z_]+)`/g)) {
+          expect(state, `${unit.nodeId}: ${id} names ${key}`).toHaveProperty(key!);
+        }
+      }
+    }
   });
 
   it('leaves out disabled entries', () => {
@@ -365,8 +507,8 @@ describe('stripSymthinkGlyphs', () => {
 });
 
 describe('JEV_QUESTION_SET_VERSION', () => {
-  it('is 3.1.0', () => {
-    expect(JEV_QUESTION_SET_VERSION).toBe('3.1.0');
+  it('is 3.2.0', () => {
+    expect(JEV_QUESTION_SET_VERSION).toBe('3.2.0');
   });
 });
 
@@ -418,8 +560,50 @@ describe('JEV_REVIEW_QUESTIONS', () => {
     const ideaOnly = JEV_REVIEW_QUESTIONS.filter((item) => item.ideaUnitOnly).map((item) => item.key);
     expect(ideaOnly.sort()).toEqual(['answers_question', 'question_leading']);
     expect(byKey('support_repeats')?.minSupporting).toBe(2);
-    expect(JEV_REVIEW_QUESTIONS.filter((item) => item.minSupporting !== undefined)).toHaveLength(1);
+    expect(JEV_REVIEW_QUESTIONS.filter((item) => item.minSupporting !== undefined)).toHaveLength(3);
+    expect(byKey('structure')?.minSupporting).toBe(2);
+    expect(byKey('support_ordered')?.minSupporting).toBe(2);
     expect(JEV_REVIEW_QUESTIONS.some((item) => 'minClaims' in item)).toBe(false);
+  });
+
+  it('declares the scheme, structure and critical entries in order after the fallacies', () => {
+    const tail = JEV_REVIEW_QUESTIONS.slice(JEV_REVIEW_QUESTIONS.findIndex((e) => e.key === 'scheme'));
+    expect(tail.map((entry) => entry.key)).toEqual(SCHEME_KEYS);
+    expect(JEV_REVIEW_QUESTIONS.slice(0, -tail.length).some((e) => e.kind === 'critical')).toBe(false);
+    expect(tail.map((entry) => entry.kind)).toEqual([
+      'scheme',
+      'scheme',
+      'structure',
+      'structure',
+      'structure',
+      ...Array(10).fill('critical'),
+    ]);
+    expect(byKey('scheme')).toMatchObject({ polarity: 'none' });
+    expect(byKey('scheme')?.question).toBeTypeOf('function');
+    expect(byKey('scheme_fits')?.polarity).toBe('none');
+    expect(byKey('structure')).toMatchObject({ polarity: 'none', minSupporting: 2 });
+    expect(byKey('support_ordered')).toMatchObject({ polarity: 'none', minSupporting: 2 });
+    expect(byKey('conclusion_restates')).toMatchObject({ polarity: 'none', requiresConclusion: true });
+  });
+
+  it('carries scheme, cq, polarity and logOnly on the critical entries', () => {
+    const expected: Record<string, [string, string, string]> = {
+      cq_cons_likely: ['consequences', 'burden', 'flag'],
+      cq_cons_evidence: ['consequences', 'burden', 'flag'],
+      cq_cons_value: ['consequences', 'rebuttal', 'flag'],
+      cq_cause_timing_only: ['cause_to_effect', 'burden', 'flag'],
+      cq_cause_evidence: ['cause_to_effect', 'burden', 'flag'],
+      cq_cause_rival_addressed: ['cause_to_effect', 'rebuttal', 'good'],
+      cq_exp_expertise: ['expert_opinion', 'burden', 'flag'],
+      cq_exp_field: ['expert_opinion', 'burden', 'flag'],
+      cq_exp_opinion: ['expert_opinion', 'burden', 'flag'],
+      cq_exp_trust: ['expert_opinion', 'rebuttal', 'flag'],
+    };
+    for (const [key, [scheme, cq, polarity]] of Object.entries(expected)) {
+      expect(byKey(key), key).toMatchObject({ kind: 'critical', scheme, cq, polarity, enabled: true });
+    }
+    expect(JEV_REVIEW_QUESTIONS.filter((e) => e.logOnly).map((e) => e.key)).toEqual(['cq_cons_value']);
+    expect(JEV_REVIEW_QUESTIONS.some((e) => e.key === 'cq_cons_opposite')).toBe(false);
   });
 
   it('matches the enabled question set snapshot (wording changes must be deliberate)', () => {
@@ -429,6 +613,11 @@ describe('JEV_REVIEW_QUESTIONS', () => {
       kind: entry.kind,
       ideaUnitOnly: entry.ideaUnitOnly ?? false,
       minSupporting: entry.minSupporting ?? 0,
+      // Only present on the 3.2.0 entries that set them, so the 3.1.0 snapshot entries stay as they were.
+      ...(entry.scheme !== undefined && { scheme: entry.scheme }),
+      ...(entry.cq !== undefined && { cq: entry.cq }),
+      ...(entry.logOnly !== undefined && { logOnly: entry.logOnly }),
+      ...(entry.requiresConclusion !== undefined && { requiresConclusion: entry.requiresConclusion }),
       idea: typeof entry.question === 'function' ? entry.question({ subject: 'idea' }) : entry.question,
       claim: typeof entry.question === 'function' ? entry.question({ subject: 'claim' }) : entry.question,
     }));

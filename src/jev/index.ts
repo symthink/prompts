@@ -9,6 +9,9 @@ export {
 export {
   JEV_REVIEW_QUESTIONS,
   type ReviewQuestionEntry,
+  type ReviewQuestionKind,
+  type ReviewQuestionPolarity,
+  type ReviewQuestionScheme,
   type ReviewStateKeys,
 } from './review-questions.js';
 export {

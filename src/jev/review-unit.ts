@@ -15,6 +15,11 @@ export interface ReviewUnit {
   context: readonly { text: string }[];
   subject: ReviewNode;
   support: readonly ReviewNode[];
+  /**
+   * The ∴ line of an Argument-style unit, left out of `support`. Optional: units without one are
+   * unchanged, and keep their 3.1.0 fingerprint.
+   */
+  conclusion?: ReviewNode;
 }
 
 /** `typeInt` 0-3 is the Question band. A Question child is read by Jev but is not a supporting statement. */
@@ -45,14 +50,23 @@ function fingerprintNode(node: ReviewNode): FingerprintNode {
 
 /**
  * Content fingerprint for review staleness (P2, P3, S7): the Question text, the context texts, the
- * subject and every `support` child, in order. Computed on the unit as received, before glyph strip in builders.
+ * subject and every `support` child, in order, plus the `conclusion` when the unit has one (SR2). A unit
+ * without a conclusion hashes exactly as it did in 3.1.0. Computed on the unit as received, before glyph
+ * strip in builders.
  */
 export function fingerprintReviewUnit(unit: ReviewUnit): string {
-  const payload = {
+  const payload: {
+    conclusion?: FingerprintNode;
+    context: string[];
+    question: string;
+    subject: FingerprintNode;
+    support: FingerprintNode[];
+  } = {
     context: unit.context.map((item) => item.text),
     question: unit.question.text,
     subject: fingerprintNode(unit.subject),
     support: unit.support.map(fingerprintNode),
   };
+  if (unit.conclusion) payload.conclusion = fingerprintNode(unit.conclusion);
   return cyrb53Hex(canonicalStringify(payload));
 }
