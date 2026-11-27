@@ -5,9 +5,12 @@ export {
   buildReviewRequest,
   reviewStateKeys,
   type BuildReviewRequestOptions,
+  type BuiltReviewRequest,
 } from './review-request.js';
 export {
   JEV_REVIEW_QUESTIONS,
+  weakItemOptionId,
+  type ReviewQuestionContext,
   type ReviewQuestionEntry,
   type ReviewQuestionKind,
   type ReviewQuestionPolarity,
@@ -15,6 +18,7 @@ export {
   type ReviewStateKeys,
 } from './review-questions.js';
 export {
+  argumentPoints,
   fingerprintReviewUnit,
   supportingCount,
   type ReviewNode,

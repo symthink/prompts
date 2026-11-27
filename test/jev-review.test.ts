@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  argumentPoints,
   buildReviewRequest,
   fingerprintReviewUnit,
   JEV_QUESTION_SET_VERSION,
@@ -61,24 +62,99 @@ const IDEA_UNIT: ReviewUnit = {
   ],
 };
 
-const NESTED_CLAIM_UNIT: ReviewUnit = {
-  ...IDEA_UNIT,
-  kind: 'nested',
-  nodeId: 'claim-nested',
-  context: [{ text: 'Parent idea text.' }],
-  subject: node(
-    'nested-subject',
-    'Downtown bars close at 1:30 a.m., but the last bus leaves at midnight.',
-    8,
-  ),
-  support: [node('child-1', 'Child claim one', 8), node('child-2', 'Child claim two.', 8)],
-};
+/** Probe doc fixture: Idea with five points, all flat (B). */
+const PROBE_QUESTION = { text: 'How can the county cut drunk driving downtown?' };
+const PROBE_IDEA = node(
+  'idea-buses',
+  'Run free late-night weekend buses from downtown bars to residential areas.',
+  5,
+  'Idea',
+);
+const P1 = node('p1', 'People who have been drinking would have a free ride home, so fewer of them would need to drive.', 8);
+const P2 = node(
+  'p2',
+  "In the county's 2024 crash report, most downtown drunk-driving arrests happened between midnight and 3 a.m., after the last bus leaves at 11:30 p.m.",
+  8,
+);
+const P3 = node("p3", "The county's buses sit idle at night, so the service would not need new vehicles.", 8);
+const C1 = node(
+  'c1',
+  'Paying drivers until 3 a.m. on Fridays and Saturdays would cost the county about $400,000 a year.',
+  8,
+);
+const C2 = node(
+  'c2',
+  'Some people would still drive home if they parked downtown and need their car the next morning.',
+  8,
+);
+const REPLY_C1 = node(
+  'r1',
+  "The 2024 crash report puts the county's cost of downtown drunk-driving crashes at about $2 million a year, so preventing a fifth of them would cover the service.",
+  8,
+);
+const REPLY_C2 = node(
+  'r2',
+  'Downtown garages could offer free next-morning parking to anyone who rode the late bus.',
+  8,
+);
+const PAYS_FOR_ITSELF = node('weak1', 'The service would pay for itself.', 8);
+const PAYS_SUB = [
+  node('weak1-a', 'Downtown has more than twenty bars.', 8),
+  node('weak1-b', 'Students often ride the bus.', 8),
+];
+const COSTS_AND_LIMITS = node('con-claim', 'The service would have real costs and limits.', 8);
 
-const NESTED_IDEA_UNIT: ReviewUnit = {
-  ...NESTED_CLAIM_UNIT,
-  nodeId: 'idea-nested',
-  subject: node('nested-idea', 'Add a late-night shuttle from the bars to the transit hub.', 5, 'Idea'),
-};
+function probeUnit(support: ReviewNode[], extra: Partial<ReviewUnit> = {}): ReviewUnit {
+  return {
+    nodeId: 'idea-buses',
+    kind: 'idea',
+    question: PROBE_QUESTION,
+    context: [],
+    subject: PROBE_IDEA,
+    support,
+    ...extra,
+  };
+}
+
+function heading(id: string, text: string, support: ReviewNode[]): ReviewNode {
+  return { id, text, group: true, support };
+}
+
+/** B: flat, five points, no sub-points. */
+const FIXTURE_B = probeUnit([P1, P2, P3, C1, C2]);
+
+/** C: Pros / Cons groupings, 3 + 2 points. */
+const FIXTURE_C = probeUnit([heading('g-pros', 'Pros', [P1, P2, P3]), heading('g-cons', 'Cons', [C1, C2])]);
+
+/** F: P1, P2, a real Claim with weak sub-points, then the Cons grouping. */
+const FIXTURE_F = probeUnit([
+  P1,
+  P2,
+  { ...PAYS_FOR_ITSELF, support: PAYS_SUB },
+  heading('g-cons', 'Cons', [C1, C2]),
+]);
+
+/** F reordered: the weak Claim second, a con Claim with its own sub-points first. */
+const FIXTURE_F_REORDERED = probeUnit([
+  P1,
+  { ...COSTS_AND_LIMITS, support: [C1, C2] },
+  { ...PAYS_FOR_ITSELF, support: PAYS_SUB },
+]);
+
+/** T0: flat, downsides stated and not answered. */
+const FIXTURE_T0 = FIXTURE_B;
+
+/** T1: Pros / Cons tree with a real reply nested under each con. */
+const FIXTURE_T1 = probeUnit([
+  heading('g-pros', 'Pros', [P1, P2, P3]),
+  heading('g-cons', 'Cons', [
+    { ...C1, support: [REPLY_C1] },
+    { ...C2, support: [REPLY_C2] },
+  ]),
+]);
+
+/** T4: flat, the cost reply as a sibling item, not nested. */
+const FIXTURE_T4 = probeUnit([P1, P2, P3, C1, REPLY_C1, C2]);
 
 const CONCLUSION_UNIT: ReviewUnit = {
   ...IDEA_UNIT,
@@ -101,6 +177,9 @@ const V3_1_KEYS = [
   'slippery_slope',
   'circular_reasoning',
 ];
+
+/** A flat unit with default options (4.0.0): the 3.1.0 keys plus `objection_answered`, which follows `considers_downside`. */
+const FLAT_KEYS = [...V3_1_KEYS, 'objection_answered'];
 
 const SCHEME_KEYS = [
   'scheme',
@@ -131,6 +210,26 @@ describe('supportingCount', () => {
       }),
     ).toBe(2);
   });
+
+  it('counts points: five in the flat fixture B', () => {
+    expect(supportingCount(FIXTURE_B)).toBe(5);
+    expect(argumentPoints(FIXTURE_B).map((point) => point.id)).toEqual(['p1', 'p2', 'p3', 'c1', 'c2']);
+  });
+
+  it('counts the points inside groupings, not the groupings: five in the grouped fixture C', () => {
+    expect(FIXTURE_C.support).toHaveLength(2);
+    expect(supportingCount(FIXTURE_C)).toBe(5);
+    expect(argumentPoints(FIXTURE_C).map((point) => point.id)).toEqual(['p1', 'p2', 'p3', 'c1', 'c2']);
+  });
+
+  it('does not count sub-points', () => {
+    expect(supportingCount(FIXTURE_F)).toBe(5);
+    expect(supportingCount(probeUnit([{ ...P1, support: [P2, P3, C1] }]))).toBe(1);
+  });
+
+  it('counts nothing for a grouping with no points', () => {
+    expect(supportingCount(probeUnit([heading('g', 'Pros', [])]))).toBe(0);
+  });
 });
 
 describe('fingerprintReviewUnit', () => {
@@ -139,7 +238,7 @@ describe('fingerprintReviewUnit', () => {
     const reordered = {
       support: IDEA_UNIT.support.map((item) => ({
         typeInt: item.typeInt,
-        sources: [...item.sources],
+        sources: [...(item.sources ?? [])],
         text: item.text,
         label: item.label,
         id: item.id,
@@ -147,7 +246,7 @@ describe('fingerprintReviewUnit', () => {
       subject: {
         typeInt: IDEA_UNIT.subject.typeInt,
         text: IDEA_UNIT.subject.text,
-        sources: [...IDEA_UNIT.subject.sources],
+        sources: [...(IDEA_UNIT.subject.sources ?? [])],
         label: IDEA_UNIT.subject.label,
         id: IDEA_UNIT.subject.id,
       },
@@ -202,17 +301,61 @@ describe('fingerprintReviewUnit', () => {
   });
 
   it('changes when the Question or a context text changes', () => {
-    const base = fingerprintReviewUnit(NESTED_CLAIM_UNIT);
-    expect(
-      fingerprintReviewUnit({ ...NESTED_CLAIM_UNIT, question: { text: 'Another question?' } }),
-    ).not.toBe(base);
-    expect(
-      fingerprintReviewUnit({ ...NESTED_CLAIM_UNIT, context: [{ text: 'Other parent text.' }] }),
-    ).not.toBe(base);
+    const unit: ReviewUnit = { ...IDEA_UNIT, context: [{ text: 'Parent idea text.' }] };
+    const base = fingerprintReviewUnit(unit);
+    expect(fingerprintReviewUnit({ ...unit, question: { text: 'Another question?' } })).not.toBe(base);
+    expect(fingerprintReviewUnit({ ...unit, context: [{ text: 'Other parent text.' }] })).not.toBe(base);
   });
 
-  it('keeps the 3.1.0 fingerprint for a unit without a conclusion', () => {
-    // Hash computed with the 3.1.0 code, before `conclusion` existed.
+  it('hashes the nested shape: sub-points, groupings and the group flag all count', () => {
+    const base = fingerprintReviewUnit(FIXTURE_F);
+
+    // A sub-point edited, added or removed.
+    const subEdited = probeUnit([
+      P1,
+      P2,
+      { ...PAYS_FOR_ITSELF, support: [{ ...PAYS_SUB[0]!, text: 'Downtown has twenty bars.' }, PAYS_SUB[1]!] },
+      FIXTURE_F.support[3]!,
+    ]);
+    expect(fingerprintReviewUnit(subEdited)).not.toBe(base);
+    const subRemoved = probeUnit([
+      P1,
+      P2,
+      { ...PAYS_FOR_ITSELF, support: [PAYS_SUB[0]!] },
+      FIXTURE_F.support[3]!,
+    ]);
+    expect(fingerprintReviewUnit(subRemoved)).not.toBe(base);
+    const subDropped = probeUnit([P1, P2, PAYS_FOR_ITSELF, FIXTURE_F.support[3]!]);
+    expect(fingerprintReviewUnit(subDropped)).not.toBe(base);
+
+    // Same texts, grouped and not: the group flag changes the hash.
+    const grouped = fingerprintReviewUnit(FIXTURE_C);
+    const ungrouped = fingerprintReviewUnit(
+      probeUnit([
+        { id: 'g-pros', text: 'Pros', label: 'Claim', typeInt: 8, sources: [], support: [P1, P2, P3] },
+        { id: 'g-cons', text: 'Cons', label: 'Claim', typeInt: 8, sources: [], support: [C1, C2] },
+      ]),
+    );
+    expect(grouped).not.toBe(ungrouped);
+
+    // Moving a point between groupings.
+    const moved = probeUnit([heading('g-pros', 'Pros', [P1, P2]), heading('g-cons', 'Cons', [P3, C1, C2])]);
+    expect(fingerprintReviewUnit(moved)).not.toBe(grouped);
+  });
+
+  it('is the same for the same tree and ignores node ids at every level', () => {
+    const renumber = (node: ReviewNode): ReviewNode => ({
+      ...node,
+      id: `x-${node.id}`,
+      ...(node.support && { support: node.support.map(renumber) }),
+    });
+    expect(fingerprintReviewUnit({ ...FIXTURE_F, support: FIXTURE_F.support.map(renumber) })).toBe(
+      fingerprintReviewUnit(FIXTURE_F),
+    );
+  });
+
+  it('keeps the 3.1.0 fingerprint for a flat unit without a conclusion', () => {
+    // Hash computed with the 3.1.0 code. Optional keys are left out when absent, so a flat unit is unchanged.
     const unit: ReviewUnit = { ...IDEA_UNIT, support: IDEA_UNIT.support.slice(0, 2) };
     expect(fingerprintReviewUnit(unit)).toBe('15bac7b1696acd');
   });
@@ -242,15 +385,17 @@ describe('fingerprintReviewUnit', () => {
 });
 
 describe('buildReviewRequest', () => {
-  it('produces the research state_example state, support as an array in order', () => {
+  it('produces the research state_example state, support as an array of objects in order', () => {
     const { state } = buildReviewRequest(STATE_EXAMPLE_UNIT);
     expect(state).toEqual({
       question: 'How can our town reduce pedestrian injuries on Maple Avenue?',
       idea: 'Perhaps the town could lower the speed limit on Maple Avenue from 35 to 25 mph.',
       support: [
-        'Town police records show 14 pedestrian injuries on Maple Avenue between 2021 and 2024, and speed was cited in 9 of them.',
-        'A lower limit would only help if drivers comply.',
-        'Would drivers actually slow down without more enforcement?',
+        {
+          text: 'Town police records show 14 pedestrian injuries on Maple Avenue between 2021 and 2024, and speed was cited in 9 of them.',
+        },
+        { text: 'A lower limit would only help if drivers comply.' },
+        { text: 'Would drivers actually slow down without more enforcement?' },
       ],
     });
   });
@@ -263,6 +408,7 @@ describe('buildReviewRequest', () => {
         'support_backs_idea',
         'support_checkable',
         'considers_downside',
+        'objection_answered',
         'support_repeats',
         'question_leading',
         'loaded_wording',
@@ -276,12 +422,12 @@ describe('buildReviewRequest', () => {
     expect(Object.keys(questions).some((key) => /_c\d+$/.test(key))).toBe(false);
   });
 
-  it('has exactly the 3.1.0 question keys with default options', () => {
+  it('has exactly the 3.1.0 question keys plus objection_answered with default options for a flat unit', () => {
     for (const unit of [IDEA_UNIT, CONCLUSION_UNIT]) {
       const { questions } = buildReviewRequest(unit);
-      expect(Object.keys(questions).sort()).toEqual([...V3_1_KEYS].sort());
+      expect(Object.keys(questions).sort()).toEqual([...FLAT_KEYS].sort());
       expect(Object.keys(buildReviewRequest(unit, { includeScheme: false }).questions).sort()).toEqual(
-        [...V3_1_KEYS].sort(),
+        [...FLAT_KEYS].sort(),
       );
     }
   });
@@ -290,7 +436,7 @@ describe('buildReviewRequest', () => {
     const { questions, state } = buildReviewRequest(IDEA_UNIT, { includeScheme: true });
     expect(supportingCount(IDEA_UNIT)).toBe(4);
     expect(Object.keys(questions).sort()).toEqual(
-      [...V3_1_KEYS, ...SCHEME_KEYS.filter((key) => key !== 'conclusion_restates')].sort(),
+      [...FLAT_KEYS, ...SCHEME_KEYS.filter((key) => key !== 'conclusion_restates')].sort(),
     );
     expect(state).not.toHaveProperty('conclusion');
   });
@@ -307,7 +453,7 @@ describe('buildReviewRequest', () => {
 
   it('sends conclusion_restates and the conclusion state key for a unit with a conclusion', () => {
     const { questions, state } = buildReviewRequest(CONCLUSION_UNIT, { includeScheme: true });
-    expect(Object.keys(questions).sort()).toEqual([...V3_1_KEYS, ...SCHEME_KEYS].sort());
+    expect(Object.keys(questions).sort()).toEqual([...FLAT_KEYS, ...SCHEME_KEYS].sort());
     expect(state).toHaveProperty('conclusion', 'So later buses would cut drunk driving downtown.');
     expect(questions.conclusion_restates?.instructions).toBe(
       'Does `conclusion` say the same thing as `idea`?',
@@ -328,27 +474,8 @@ describe('buildReviewRequest', () => {
     expect(glyphOnly.state).toHaveProperty('conclusion');
   });
 
-  it('names claim, not idea, in scheme wording for a nested Claim unit', () => {
-    const { questions, state } = buildReviewRequest(NESTED_CLAIM_UNIT, { includeScheme: true });
-    expect(questions.scheme?.instructions).toBe(
-      'Which pattern of reasoning do the statements in `support` mainly use to back `claim`?',
-    );
-    expect(questions.structure?.instructions).toContain('back `claim`?');
-    expect(questions.cq_cause_evidence?.instructions).toContain('in `claim` or `support`');
-    expect(questions.structure).toMatchObject({
-      type: 'choice',
-      criteria: { linked: expect.stringContaining('support the claim only in combination') },
-    });
-    for (const [id, question] of Object.entries(questions)) {
-      expect(question.instructions, id).not.toContain('`idea`');
-      for (const [, key] of question.instructions.matchAll(/`([a-z_]+)`/g)) {
-        expect(state, `${id} names ${key}`).toHaveProperty(key!);
-      }
-    }
-  });
-
   it('only names keys that exist in the state with includeScheme', () => {
-    for (const unit of [IDEA_UNIT, CONCLUSION_UNIT, NESTED_IDEA_UNIT]) {
+    for (const unit of [IDEA_UNIT, CONCLUSION_UNIT, FIXTURE_F, FIXTURE_C]) {
       const { state, questions } = buildReviewRequest(unit, { includeScheme: true });
       for (const [id, question] of Object.entries(questions)) {
         for (const [, key] of question.instructions.matchAll(/`([a-z_]+)`/g)) {
@@ -361,9 +488,9 @@ describe('buildReviewRequest', () => {
   it('leaves out disabled entries', () => {
     const disabled = JEV_REVIEW_QUESTIONS.filter((entry) => !entry.enabled).map((entry) => entry.key);
     expect(disabled.sort()).toEqual(['hasty_generalisation', 'idea_compound']);
-    for (const unit of [IDEA_UNIT, NESTED_CLAIM_UNIT, NESTED_IDEA_UNIT]) {
+    for (const unit of [IDEA_UNIT, FIXTURE_F, FIXTURE_C]) {
       const { questions } = buildReviewRequest(unit);
-      for (const key of disabled) expect(questions[key], `${unit.kind}:${key}`).toBeUndefined();
+      for (const key of disabled) expect(questions[key], `${unit.nodeId}:${key}`).toBeUndefined();
     }
   });
 
@@ -413,16 +540,16 @@ describe('buildReviewRequest', () => {
       support: [IDEA_UNIT.support[0]!, node('blank', '   ', 8), IDEA_UNIT.support[1]!],
     };
     expect(buildReviewRequest(withBlank).state).toHaveProperty('support', [
-      'Downtown bars close at 1:30 a.m., but the last bus leaves at midnight.',
-      'Everyone I know thinks the buses should run later.',
+      { text: 'Downtown bars close at 1:30 a.m., but the last bus leaves at midnight.' },
+      { text: 'Everyone I know thinks the buses should run later.' },
     ]);
   });
 
   it('only names keys that exist in the request state', () => {
     for (const [name, unit] of [
-      ['idea', IDEA_UNIT],
-      ['nested with a Claim subject', NESTED_CLAIM_UNIT],
-      ['nested with an Idea subject', NESTED_IDEA_UNIT],
+      ['flat', IDEA_UNIT],
+      ['grouped', FIXTURE_C],
+      ['with a weak link', FIXTURE_F],
     ] as const) {
       const { state, questions } = buildReviewRequest(unit);
       expect(Object.keys(questions).length, name).toBeGreaterThan(0);
@@ -434,44 +561,17 @@ describe('buildReviewRequest', () => {
     }
   });
 
-  it('uses claim for a nested Claim subject and idea for a nested Idea subject', () => {
-    const claim = buildReviewRequest(NESTED_CLAIM_UNIT);
-    expect(claim.state).toEqual({
-      question: 'How can the city cut drunk driving downtown?',
-      claim: 'Downtown bars close at 1:30 a.m., but the last bus leaves at midnight.',
-      support: ['Child claim one', 'Child claim two.'],
-      context: ['Parent idea text.'],
-    });
-    expect(claim.questions.support_backs_idea?.instructions).toContain('reasons to accept `claim`');
-    expect(claim.questions.circular_reasoning?.instructions).toContain('back `claim` only');
-
-    const idea = buildReviewRequest(NESTED_IDEA_UNIT);
-    expect(idea.state).toEqual({
-      question: 'How can the city cut drunk driving downtown?',
-      idea: 'Add a late-night shuttle from the bars to the transit hub.',
-      support: ['Child claim one', 'Child claim two.'],
-      context: ['Parent idea text.'],
-    });
-    expect(idea.questions.support_backs_idea?.instructions).toContain('reasons to accept `idea`');
+  it('never sends context: a unit is an Idea under a Question', () => {
+    const withContext: ReviewUnit = { ...IDEA_UNIT, context: [{ text: 'ignored' }] };
+    expect(buildReviewRequest(withContext).state).not.toHaveProperty('context');
   });
 
-  it('omits context for nested units without one and for idea units', () => {
-    const noContext: ReviewUnit = { ...NESTED_CLAIM_UNIT, context: [] };
-    expect(buildReviewRequest(noContext).state).not.toHaveProperty('context');
-    const ideaWithContext: ReviewUnit = { ...IDEA_UNIT, context: [{ text: 'ignored' }] };
-    expect(buildReviewRequest(ideaWithContext).state).not.toHaveProperty('context');
-  });
-
-  it('asks no answers_question and no question_leading for nested units', () => {
-    for (const unit of [NESTED_CLAIM_UNIT, NESTED_IDEA_UNIT]) {
+  it('always asks answers_question and question_leading', () => {
+    for (const unit of [IDEA_UNIT, FIXTURE_B, FIXTURE_C, FIXTURE_F]) {
       const { questions } = buildReviewRequest(unit);
-      expect(questions.answers_question).toBeUndefined();
-      expect(questions.question_leading).toBeUndefined();
-      expect(questions.support_backs_idea).toBeDefined();
+      expect(questions.answers_question, unit.nodeId).toBeDefined();
+      expect(questions.question_leading, unit.nodeId).toBeDefined();
     }
-    const { questions } = buildReviewRequest(IDEA_UNIT);
-    expect(questions.answers_question).toBeDefined();
-    expect(questions.question_leading).toBeDefined();
   });
 
   it('strips Symthink glyphs from state text', () => {
@@ -488,13 +588,277 @@ describe('buildReviewRequest', () => {
     expect(state).toMatchObject({
       question: 'How can we fix this?',
       idea: 'Maybe buses help.',
-      support: ['Bars close late.', 'What if buses ran later?'],
+      support: [{ text: 'Bars close late.' }, { text: 'What if buses ran later?' }],
     });
   });
 
-  it('strips Symthink glyphs from context text', () => {
-    const withGlyphs: ReviewUnit = { ...NESTED_CLAIM_UNIT, context: [{ text: 'Parent idea💡' }] };
-    expect(buildReviewRequest(withGlyphs).state).toHaveProperty('context', ['Parent idea.']);
+  it('strips Symthink glyphs from nested and grouping text', () => {
+    const { state } = buildReviewRequest(
+      probeUnit([
+        heading('g', 'Pros💡', [{ ...P1, text: 'A reason❓', support: [{ ...P2, text: 'A sub-point💡' }] }]),
+      ]),
+    );
+    expect(state.support).toEqual([
+      { text: 'Pros.', group: true, support: [{ text: 'A reason?', support: [{ text: 'A sub-point.' }] }] },
+    ]);
+  });
+});
+
+describe('buildReviewRequest: the argument as a tree (4.0.0)', () => {
+  const keysOf = (unit: ReviewUnit, options = {}) => Object.keys(buildReviewRequest(unit, options).questions);
+
+  it('sends state support as nested objects with no ids', () => {
+    const { state } = buildReviewRequest(FIXTURE_F);
+    expect(state).toEqual({
+      question: 'How can the county cut drunk driving downtown?',
+      idea: 'Run free late-night weekend buses from downtown bars to residential areas.',
+      support: [
+        { text: P1.text },
+        { text: P2.text },
+        {
+          text: 'The service would pay for itself.',
+          support: [{ text: 'Downtown has more than twenty bars.' }, { text: 'Students often ride the bus.' }],
+        },
+        { text: 'Cons', group: true, support: [{ text: C1.text }, { text: C2.text }] },
+      ],
+    });
+    expect(JSON.stringify(state)).not.toMatch(/"id"|weak1|g-cons|"typeInt"|"sources"|"label"/);
+  });
+
+  it('marks groupings with group: true and leaves support and group out when unused', () => {
+    const { state } = buildReviewRequest(FIXTURE_C);
+    expect(state.support).toEqual([
+      { text: 'Pros', group: true, support: [{ text: P1.text }, { text: P2.text }, { text: P3.text }] },
+      { text: 'Cons', group: true, support: [{ text: C1.text }, { text: C2.text }] },
+    ]);
+    const flat = buildReviewRequest(FIXTURE_B).state.support as Record<string, unknown>[];
+    for (const item of flat) expect(Object.keys(item)).toEqual(['text']);
+  });
+
+  it('drops blank sub-points, and a grouping with nothing under it', () => {
+    const { state, questions } = buildReviewRequest(
+      probeUnit([
+        { ...P1, support: [node('b', '  ', 8), node('b2', '', 8)] },
+        heading('g-empty', 'Pros', [node('b3', ' ', 8)]),
+        heading('g-none', 'Cons', []),
+      ]),
+    );
+    expect(state.support).toEqual([{ text: P1.text }]);
+    expect(questions.sub_support_backs).toBeUndefined();
+  });
+
+  describe('fixture B (flat)', () => {
+    it('has five points and asks neither sub_support_backs nor weak_item', () => {
+      expect(supportingCount(FIXTURE_B)).toBe(5);
+      const result = buildReviewRequest(FIXTURE_B, { includeScheme: true });
+      expect(result.questions.sub_support_backs).toBeUndefined();
+      expect(result.questions.weak_item).toBeUndefined();
+      expect(result.weakItemOptions).toEqual({});
+    });
+  });
+
+  describe('fixture C (grouped)', () => {
+    it('counts five points, asks support_repeats, and asks neither weak-link question', () => {
+      expect(supportingCount(FIXTURE_C)).toBe(5);
+      const { questions, weakItemOptions } = buildReviewRequest(FIXTURE_C);
+      expect(questions.support_repeats).toBeDefined();
+      expect(questions.sub_support_backs).toBeUndefined();
+      expect(questions.weak_item).toBeUndefined();
+      expect(weakItemOptions).toEqual({});
+    });
+
+    it('asks structure and support_ordered with includeScheme, since five points are counted', () => {
+      const { questions } = buildReviewRequest(FIXTURE_C, { includeScheme: true });
+      expect(questions.structure).toBeDefined();
+      expect(questions.support_ordered).toBeDefined();
+    });
+
+    it('does not count the groupings: two headings alone would not ask support_repeats', () => {
+      const oneEach = probeUnit([heading('a', 'Pros', [P1]), heading('b', 'Cons', [C1])]);
+      expect(supportingCount(oneEach)).toBe(2);
+      expect(buildReviewRequest(oneEach).questions.support_repeats).toBeDefined();
+      const single = probeUnit([heading('a', 'Pros', [P1]), heading('b', 'Cons', [])]);
+      expect(supportingCount(single)).toBe(1);
+      expect(buildReviewRequest(single).questions.support_repeats).toBeUndefined();
+    });
+  });
+
+  describe('support_repeats with object items', () => {
+    it('is asked for a flat list of object items', () => {
+      expect(buildReviewRequest(FIXTURE_B).questions.support_repeats).toBeDefined();
+    });
+
+    it('is asked for points that carry sub-points, and counts points, not sub-points', () => {
+      expect(buildReviewRequest(FIXTURE_F).questions.support_repeats).toBeDefined();
+      const onePoint = probeUnit([{ ...P1, support: [P2, P3, C1] }]);
+      expect(buildReviewRequest(onePoint).questions.support_repeats).toBeUndefined();
+    });
+  });
+
+  describe('sub_support_backs', () => {
+    it('is sent only when some point has sub-points', () => {
+      expect(keysOf(FIXTURE_B)).not.toContain('sub_support_backs');
+      expect(keysOf(FIXTURE_C)).not.toContain('sub_support_backs');
+      expect(keysOf(FIXTURE_F)).toContain('sub_support_backs');
+      expect(keysOf(FIXTURE_T1)).toContain('sub_support_backs');
+    });
+
+    it('is sent whatever includeFallacies and includeScheme are', () => {
+      expect(keysOf(FIXTURE_F, { includeFallacies: false })).toContain('sub_support_backs');
+      expect(keysOf(FIXTURE_F, { includeScheme: true })).toContain('sub_support_backs');
+    });
+
+    it("carries the probe's wording word for word", () => {
+      expect(buildReviewRequest(FIXTURE_F).questions.sub_support_backs).toEqual({
+        type: 'noul',
+        instructions:
+          'For each item in `support` that has its own `support`, do those sub-points work as reasons to accept that item? An item that is only a heading grouping points (such as "Pros" or "Cons") needs no backing. Judge the reasoning only, not whether anything is true.',
+        criteria: {
+          true: 'Every item that has sub-points is backed by them, or is only a heading',
+          false:
+            'At least one item that has sub-points is not backed by them: they are background, off topic, or repeat it',
+        },
+      });
+    });
+  });
+
+  describe('weak_item', () => {
+    it('is sent only with sub_support_backs', () => {
+      for (const unit of [FIXTURE_B, FIXTURE_C, FIXTURE_F, FIXTURE_F_REORDERED, FIXTURE_T1]) {
+        const keys = keysOf(unit);
+        expect(keys.includes('weak_item'), unit.nodeId).toBe(keys.includes('sub_support_backs'));
+      }
+    });
+
+    it("carries the probe's instructions and builds i1, i2 ... and none", () => {
+      const { questions } = buildReviewRequest(FIXTURE_F_REORDERED);
+      expect(questions.weak_item).toEqual({
+        type: 'choice',
+        instructions:
+          'Of the items in `support` that have their own `support`, which one is least well backed by its sub-points? An item that is only a heading grouping points (such as "Pros" or "Cons") needs no backing. Judge the reasoning only, not whether anything is true.',
+        criteria: {
+          i1: 'The item "The service would have real costs and limits."',
+          i2: 'The item "The service would pay for itself."',
+          none: 'Every item with sub-points is backed by them, or is only a heading',
+        },
+      });
+    });
+
+    it('fixture F: i1 is the weak Claim and weakItemOptions maps it to its node id', () => {
+      const { questions, weakItemOptions } = buildReviewRequest(FIXTURE_F);
+      expect(questions.weak_item).toMatchObject({
+        criteria: { i1: 'The item "The service would pay for itself."', none: expect.any(String) },
+      });
+      expect(Object.keys((questions.weak_item as { criteria: object }).criteria)).toEqual(['i1', 'none']);
+      expect(weakItemOptions).toEqual({ i1: 'weak1' });
+    });
+
+    it('fixture F reordered: i1 and i2 map to the right node ids, in tree order', () => {
+      const { weakItemOptions } = buildReviewRequest(FIXTURE_F_REORDERED);
+      expect(weakItemOptions).toEqual({ i1: 'con-claim', i2: 'weak1' });
+    });
+
+    it('lists points with sub-points inside groupings, in tree order', () => {
+      const unit = probeUnit([
+        heading('g-pros', 'Pros', [{ ...P1, support: [P2] }, P3]),
+        heading('g-cons', 'Cons', [{ ...C1, support: [REPLY_C1] }, C2]),
+      ]);
+      const { questions, weakItemOptions } = buildReviewRequest(unit);
+      expect(weakItemOptions).toEqual({ i1: 'p1', i2: 'c1' });
+      expect(Object.keys((questions.weak_item as { criteria: object }).criteria)).toEqual(['i1', 'i2', 'none']);
+    });
+
+    it('never offers a grouping, a sub-point, or a point without sub-points', () => {
+      const { weakItemOptions } = buildReviewRequest(FIXTURE_T1);
+      expect(Object.values(weakItemOptions)).toEqual(['c1', 'c2']);
+    });
+
+    it('leaves blank points out of the options', () => {
+      const unit = probeUnit([
+        { ...node('blank', '  ', 8), support: [P2] },
+        { ...P1, support: [P3] },
+      ]);
+      expect(buildReviewRequest(unit).weakItemOptions).toEqual({ i1: 'p1' });
+    });
+
+    it('does not send the option map to Jev: it is not part of state or questions', () => {
+      const result = buildReviewRequest(FIXTURE_F);
+      expect(JSON.stringify(result.state)).not.toContain('weak1');
+      expect(JSON.stringify(result.questions)).not.toContain('weak1');
+    });
+  });
+
+  describe('objection_answered', () => {
+    it('follows considers_downside, on every shape of tree', () => {
+      for (const unit of [IDEA_UNIT, FIXTURE_B, FIXTURE_C, FIXTURE_F, FIXTURE_T0, FIXTURE_T1, FIXTURE_T4]) {
+        const keys = keysOf(unit);
+        expect(keys, unit.nodeId).toContain('considers_downside');
+        expect(keys, unit.nodeId).toContain('objection_answered');
+      }
+    });
+
+    it('is not sent without considers_downside', () => {
+      const original = JEV_REVIEW_QUESTIONS.find((entry) => entry.key === 'considers_downside')!;
+      const enabled = original.enabled;
+      (original as { enabled: boolean }).enabled = false;
+      try {
+        const { questions } = buildReviewRequest(FIXTURE_C);
+        expect(questions.considers_downside).toBeUndefined();
+        expect(questions.objection_answered).toBeUndefined();
+      } finally {
+        (original as { enabled: boolean }).enabled = enabled;
+      }
+    });
+
+    it("carries the probe's wording word for word", () => {
+      expect(buildReviewRequest(FIXTURE_T1).questions.objection_answered).toEqual({
+        type: 'noul',
+        instructions:
+          'Look at the items in `support` that count against the idea (downsides, costs, objections). Does the argument reply to the strongest of them: is there a point, usually nested under that downside, that answers it by reducing, outweighing or addressing it? Stating a downside is not replying to it. Judge the reasoning only, not whether anything is true.',
+        criteria: {
+          true: 'The strongest downside has a reply that genuinely answers it',
+          false: "No downside is answered, or the replies don't address the downside they sit under",
+        },
+      });
+    });
+
+    it('sends the T1 tree with a reply nested under each con, and T4 with the reply as a sibling', () => {
+      expect(buildReviewRequest(FIXTURE_T1).state.support).toEqual([
+        { text: 'Pros', group: true, support: [{ text: P1.text }, { text: P2.text }, { text: P3.text }] },
+        {
+          text: 'Cons',
+          group: true,
+          support: [
+            { text: C1.text, support: [{ text: REPLY_C1.text }] },
+            { text: C2.text, support: [{ text: REPLY_C2.text }] },
+          ],
+        },
+      ]);
+      expect(supportingCount(FIXTURE_T4)).toBe(6);
+      expect(buildReviewRequest(FIXTURE_T4).state.support).toHaveLength(6);
+    });
+  });
+
+  it('asks the sub-point questions in order after support_backs_idea, and objection_answered after considers_downside', () => {
+    const keys = keysOf(FIXTURE_F);
+    expect(keys.slice(0, 6)).toEqual([
+      'answers_question',
+      'support_backs_idea',
+      'sub_support_backs',
+      'weak_item',
+      'support_checkable',
+      'considers_downside',
+    ]);
+    expect(keys[6]).toBe('objection_answered');
+  });
+
+  it('adds the scheme questions on a tree with includeScheme, unchanged', () => {
+    const { questions } = buildReviewRequest(FIXTURE_F, { includeScheme: true });
+    for (const key of SCHEME_KEYS.filter((key) => key !== 'conclusion_restates')) {
+      expect(questions[key], key).toBeDefined();
+    }
+    expect(questions.weak_item).toBeDefined();
+    expect(questions.objection_answered).toBeDefined();
   });
 });
 
@@ -507,8 +871,8 @@ describe('stripSymthinkGlyphs', () => {
 });
 
 describe('JEV_QUESTION_SET_VERSION', () => {
-  it('is 3.2.0', () => {
-    expect(JEV_QUESTION_SET_VERSION).toBe('3.2.0');
+  it('is 4.0.0', () => {
+    expect(JEV_QUESTION_SET_VERSION).toBe('4.0.0');
   });
 });
 
@@ -539,6 +903,13 @@ describe('JEV_REVIEW_QUESTIONS', () => {
       expect(byKey(key)?.polarity, key).toBe('good');
       expect(byKey(key)?.kind, key).toBe('rubric');
     }
+    for (const [key, polarity] of [
+      ['sub_support_backs', 'good'],
+      ['weak_item', 'none'],
+      ['objection_answered', 'good'],
+    ] as const) {
+      expect(byKey(key), key).toMatchObject({ polarity, kind: 'rubric', enabled: true });
+    }
     for (const key of ['support_repeats', 'question_leading', 'loaded_wording', 'idea_compound']) {
       expect(byKey(key)?.polarity, key).toBe('flag');
       expect(byKey(key)?.kind, key).toBe('rubric');
@@ -556,11 +927,13 @@ describe('JEV_REVIEW_QUESTIONS', () => {
     ]);
   });
 
-  it('marks the idea-unit-only entries and the minimum supporting count', () => {
-    const ideaOnly = JEV_REVIEW_QUESTIONS.filter((item) => item.ideaUnitOnly).map((item) => item.key);
-    expect(ideaOnly.sort()).toEqual(['answers_question', 'question_leading']);
+  it('marks the minimum supporting count and the conditional entries', () => {
+    expect(JEV_REVIEW_QUESTIONS.some((item) => 'ideaUnitOnly' in item)).toBe(false);
     expect(byKey('support_repeats')?.minSupporting).toBe(2);
     expect(JEV_REVIEW_QUESTIONS.filter((item) => item.minSupporting !== undefined)).toHaveLength(3);
+    expect(byKey('sub_support_backs')?.requiresSubPoints).toBe(true);
+    expect(byKey('weak_item')?.sentWith).toBe('sub_support_backs');
+    expect(byKey('objection_answered')?.sentWith).toBe('considers_downside');
     expect(byKey('structure')?.minSupporting).toBe(2);
     expect(byKey('support_ordered')?.minSupporting).toBe(2);
     expect(JEV_REVIEW_QUESTIONS.some((item) => 'minClaims' in item)).toBe(false);
@@ -611,15 +984,22 @@ describe('JEV_REVIEW_QUESTIONS', () => {
       key: entry.key,
       polarity: entry.polarity,
       kind: entry.kind,
-      ideaUnitOnly: entry.ideaUnitOnly ?? false,
       minSupporting: entry.minSupporting ?? 0,
-      // Only present on the 3.2.0 entries that set them, so the 3.1.0 snapshot entries stay as they were.
+      // Only present on the entries that set them, so the 3.1.0 snapshot entries stay as they were.
       ...(entry.scheme !== undefined && { scheme: entry.scheme }),
       ...(entry.cq !== undefined && { cq: entry.cq }),
       ...(entry.logOnly !== undefined && { logOnly: entry.logOnly }),
       ...(entry.requiresConclusion !== undefined && { requiresConclusion: entry.requiresConclusion }),
-      idea: typeof entry.question === 'function' ? entry.question({ subject: 'idea' }) : entry.question,
-      claim: typeof entry.question === 'function' ? entry.question({ subject: 'claim' }) : entry.question,
+      ...(entry.requiresSubPoints !== undefined && { requiresSubPoints: entry.requiresSubPoints }),
+      ...(entry.sentWith !== undefined && { sentWith: entry.sentWith }),
+      idea:
+        typeof entry.question === 'function'
+          ? entry.question({ subject: 'idea' }, { weakItemTexts: ['First item', 'Second item'] })
+          : entry.question,
+      claim:
+        typeof entry.question === 'function'
+          ? entry.question({ subject: 'claim' }, { weakItemTexts: ['First item', 'Second item'] })
+          : entry.question,
     }));
     expect(enabled).toMatchSnapshot();
   });

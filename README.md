@@ -106,33 +106,45 @@ const fingerprint = fingerprintReviewUnit(unit);
 `JEV_QUESTION_SET_VERSION` bumps whenever Jev question wording in `src/jev/` changes. The review
 question list lives in `JEV_REVIEW_QUESTIONS` (`src/jev/review-questions.ts`).
 
-A review unit is one Idea or Claim and its **support**: the statements, Questions and other children
-directly under it. `ReviewUnit` is
-`{ nodeId, kind: 'idea' | 'nested', question: { text }, context: { text }[], subject, support }`,
-plus an optional `conclusion?: ReviewNode`, where `subject`, `conclusion` and each `support` item are
-`ReviewNode`s (`{ id, text, label, typeInt, sources }`).
-`idea` is an Idea directly under a Question; `nested` is an Idea or Claim reached further down.
-`conclusion` is the ∴ line of an Argument-style unit, which is left out of `support`.
+A review unit is **one Idea under a Question, reviewed as one argument** (question set 4.0.0): the Idea,
+its **points**, and one level of **sub-points** under each point. `ReviewUnit` is
+`{ nodeId, kind: 'idea', question: { text }, context: { text }[], subject, support }`, plus an optional
+`conclusion?: ReviewNode`. `subject`, `conclusion` and every node in `support` are `ReviewNode`s:
+`{ id, text, label, typeInt, sources, support?, group? }`.
+
+- `support` is a **tree**. Each point may carry its sub-points in its own `support`.
+- When the Idea's supports are **groupings** (Pros / Cons), `support` holds the groupings as
+  `{ id, text, group: true, support: points }`, and the points sit inside them. A grouping leaves out
+  `label`, `typeInt` and `sources`, so those three are optional on `ReviewNode`. A grouping with no points
+  is dropped when the request is built, and groupings and a `conclusion` are never both present.
+- The shape matches `@symthink/tree`'s review unit. The library does not cap the depth; tree stops at
+  sub-points.
+- `conclusion` is the ∴ line of an Argument-style unit, which is left out of `support`.
+
+`supportingCount(unit)` counts **points**: the top-level `support` items, or the items inside the
+groupings when they are grouped. Sub-points and the groupings themselves are not counted, and items in
+the Question band (`typeInt` 0-3) are not counted either. `argumentPoints(unit)` returns those points.
+Every `minSupporting` filter uses `supportingCount`.
+
 `fingerprintReviewUnit(unit)` hashes the Question text, the context texts, the subject and every
-`support` item (text, label, `typeInt`, sources) in order, plus `conclusion` **only when the unit has
-one**, so a unit without a ∴ line keeps the fingerprint it had in 3.1.0. `supportingCount(unit)` counts the
-`support` items outside the Question band (`typeInt` 0-3).
+`support` node (text, label, `typeInt`, sources, `group`, and its own nested `support`) in order, plus
+`conclusion` **only when the unit has one**. Optional keys are left out when absent, so a flat unit
+without a conclusion hashes as it did in 3.1.0. Ids are not hashed.
 
-`buildReviewRequest` sends the support as an **array of strings**, in order, with empty items
-dropped, and every question is asked once against the statements taken together. Symthink glyphs are
-replaced in every text:
+`buildReviewRequest(unit, options)` returns `{ state, questions, weakItemOptions }`. Send only `state`
+and `questions` to Jev. Symthink glyphs are replaced in every text, blank items are dropped, and every
+question is asked once against the argument taken together:
 
-- Idea unit: `{ question, idea, support }`
-- Any unit with a `conclusion` whose text is not empty also gets `conclusion`, whatever `includeScheme`
-  is.
-- Nested unit: `{ question, context?, idea | claim, support }`, where the subject sits under `idea`
-  when its `typeInt` is 4-6 and `claim` otherwise, and `context` (the texts between the Question and
-  the subject) is sent only when it is not empty. In nested units `question` and `context` are
-  background; no question names `context`.
+- `state` is `{ question, idea, support, conclusion? }`. `support` is **nested JSON objects**:
+  `{ text, group?, support? }`, with `group` and `support` absent when unused and **no ids**. The
+  `conclusion` is sent whenever the unit has a non-empty one, whatever `includeScheme` is. `context` is
+  never sent: a unit is an Idea directly under a Question.
+- `weakItemOptions` maps each `weak_item` option id (`i1`, `i2`, ...) to the node id of the point it
+  names, so the app can turn the answer back into a node. It is `{}` when `weak_item` is not asked.
 
 Question ids are the entry keys (`answers_question`, `support_backs_idea`, `slippery_slope`, …); there
-are no per-item ids. Each entry's `question` receives the unit's subject key
-(`reviewStateKeys(unit)`), so its wording names `idea` or `claim` as appropriate. Entries carry:
+are no per-item ids. Each entry's `question` receives the unit's subject key (`reviewStateKeys(unit)`,
+always `idea`) and, for entries built per request, the request's `ReviewQuestionContext`. Entries carry:
 
 - `polarity`: `flag` when yes is the problem (`support_repeats`, `question_leading`,
   `loaded_wording`, `idea_compound`, every fallacy), `good` when no is (or a low score), `none` when
@@ -142,9 +154,11 @@ are no per-item ids. Each entry's `question` receives the unit's subject key
   `structure` and `critical` are sent **only** with `{ includeScheme: true }` (default `false`, so a
   request built with default options has exactly the 3.1.0 question keys).
 - `enabled`: disabled entries are never sent.
-- `ideaUnitOnly`: skipped in `nested` units (`answers_question`, `question_leading`).
-- `minSupporting`: skipped when `supportingCount(unit)` is lower (`support_repeats`, `structure` and
-  `support_ordered` use `2`).
+- `minSupporting`: skipped when `supportingCount(unit)` (points) is lower (`support_repeats`,
+  `structure` and `support_ordered` use `2`).
+- `requiresSubPoints`: skipped unless some point has sub-points (`sub_support_backs`).
+- `sentWith`: skipped unless the entry with that key is sent in the same request (`weak_item` with
+  `sub_support_backs`, `objection_answered` with `considers_downside`).
 - `requiresConclusion`: skipped when the unit has no `conclusion` (`conclusion_restates`).
 - `scheme` and `cq` (critical entries): the scheme the question belongs to (`consequences`,
   `cause_to_effect` or `expert_opinion`) and whether it puts the burden on the author's support
@@ -152,7 +166,21 @@ are no per-item ids. Each entry's `question` receives the unit's subject key
 - `logOnly`: the answer is stored in `argument_reviews.answers` but never shown to the author
   (`cq_cons_value`).
 
-**Scheme-aware questions (3.2.0).** With `includeScheme: true` the one request also asks, after the
+**Tree questions (4.0.0).** Three rubric entries, with the wording probed on 2026-11-25 (see the Jev
+argument-tree probe in the research folder):
+
+- `sub_support_backs` (Noul): does each point that has sub-points get backed by them? A heading
+  (Pros / Cons) needs no backing. Sent **only when some point has sub-points**: on a flat list it answers
+  about 0.9 by default.
+- `weak_item` (Choice): which point with sub-points is least well backed? The options are built **per
+  request**: `i1`, `i2`, ... for each point that has sub-points, in tree order (text `The item "…"`), plus
+  `none`. It is sent **only with `sub_support_backs`**, and `weakItemOptions` maps the ids back to node
+  ids. The Noul detects and the Choice locates, so the app should read `weak_item` only when
+  `sub_support_backs` fires: the Choice is unsure (about 0.46) when there is no weak link.
+- `objection_answered` (Noul, level 3 "Tested"): does the argument reply to its strongest downside?
+  Sent **whenever `considers_downside` is sent**.
+
+**Scheme-aware questions (3.2.0, carried into 4.0.0 unchanged).** With `includeScheme: true` the one request also asks, after the
 fallacies: `scheme` (Choice: `consequences`, `cause_to_effect`, `expert_opinion`) and `scheme_fits`;
 `structure` (Choice: `convergent`, `linked`, `serial`, `mixed`), `support_ordered` and
 `conclusion_restates`; and ten critical questions (`cq_cons_*`, `cq_cause_*`, `cq_exp_*`) for the three
@@ -161,7 +189,7 @@ The wording was probed against Jev on 2026-11-24 (22 units, see the scheme-aware
 has not had a labelled run.
 
 The set is the merged question set from the support-unit review research
-(`JEV_QUESTION_SET_VERSION` `3.2.0`). Most of its wording has **not yet been run in the playground**.
+(`JEV_QUESTION_SET_VERSION` `4.0.0`). Most of its wording has **not yet been run in the playground**.
 The exception is `considers_downside`, reworded in `3.1.0` so that bad outcomes of rejecting the
 subject, or of an alternative, no longer count as a downside, and run against every test case.
 `idea_compound` and `hasty_generalisation` ship **disabled**.
@@ -172,9 +200,11 @@ the diff), and bump `JEV_QUESTION_SET_VERSION`. To add a question, append an ent
 `polarity` and `enabled: true` once it is playground-validated; set `minSupporting` on entries that
 only make sense with enough supporting statements.
 
-Upgrading from 0.4: `ReviewUnit.claims` and `truncatedClaims` are now `support` (all children, in
-order), `kind: 'nested_claim'` is now `'nested'`, `joinClaimsParagraph` and `minClaims` are removed,
-and `reviewStateKeys` returns the subject key only.
+Upgrading from 0.4 to 0.5 (question set 3.x to 4.0.0), a major change with no compatibility code:
+`ReviewUnit.kind` is `'idea'` only (`'nested'` and the nested units are gone), `ideaUnitOnly` is removed,
+`support` is a tree, `state.support` is sent as objects instead of strings, `supportingCount` counts
+points, `buildReviewRequest` also returns `weakItemOptions`, `label`, `typeInt` and `sources` are optional on
+`ReviewNode` (groupings leave them out), and `context` is never sent.
 
 In Deno, use an `npm:` specifier:
 
